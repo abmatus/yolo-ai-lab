@@ -16,7 +16,7 @@ echo "======================================================================"
 # 1. Install Docker & Docker Compose if missing
 if ! command -v docker &> /dev/null; then
     echo "[SETUP] Installing Docker & Docker Compose..."
-    apt-get update && apt-get install -y docker.io docker-compose git v4l-utils hostapd dnsmasq
+    apt-get update && apt-get install -y docker.io docker-compose git v4l-utils hostapd dnsmasq curl
     systemctl enable docker
     systemctl start docker
 fi
@@ -27,13 +27,13 @@ if [ -n "$SUDO_USER" ]; then
     echo "[SETUP] User $SUDO_USER added to docker group."
 fi
 
-# 3. Create Systemd Autostart Service
+# 3. Create Systemd Autostart & Auto-Update Service
 SERVICE_FILE="/etc/systemd/system/hfu-ai-lab.service"
 WORKING_DIR="$(pwd)"
 
 cat <<EOF > "$SERVICE_FILE"
 [Unit]
-Description=HFU AI Workstation Autostart Service
+Description=HFU AI Workstation Autostart & Auto-Update Service
 After=network.target docker.service
 Requires=docker.service
 
@@ -41,7 +41,7 @@ Requires=docker.service
 Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=${WORKING_DIR}
-ExecStart=/usr/bin/docker-compose up -d
+ExecStart=/bin/bash ${WORKING_DIR}/scripts/update.sh
 ExecStop=/usr/bin/docker-compose down
 TimeoutStartSec=0
 
@@ -53,14 +53,13 @@ chmod 644 "$SERVICE_FILE"
 systemctl daemon-reload
 systemctl enable hfu-ai-lab.service
 
-echo "[SUCCESS] Autostart Service enabled! Station will start automatically on boot."
+echo "[SUCCESS] Autostart & Auto-Update Service enabled!"
 
 # 4. Make scripts executable
 chmod +x scripts/*.sh
 
-# 5. Build and launch initial containers
-echo "[SETUP] Building and starting Docker containers..."
-docker-compose up --build -d
+# 5. Run initial startup & container build
+bash scripts/update.sh
 
 echo "======================================================================"
 echo "[COMPLETE] Setup finished! HFU AI Workstation is ready & active."
