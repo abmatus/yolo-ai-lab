@@ -40,11 +40,11 @@ Die Weboberfläche im **"Clean Academic"** Stil basiert auf den offiziellen Corp
 
 ```mermaid
 graph TD
-    Client[BYOD Laptop / Kiosk Monitor] -->|Port 80 / Nginx| Frontend[Frontend Container: HFU Web UI]
-    Client -->|Port 8888| Jupyter[JupyterLab Container: PyTorch & YOLOv11]
-    Frontend -->|Proxy /api| Backend[FastAPI Backend Container]
-    Backend -->|OpenCV / v4l2| Cam[/dev/video0 USB Kamera]
-    Backend -->|Shell Exec| USB[USB Export & Session Reset Scripts]
+    Client["BYOD Laptop / Kiosk Monitor"] -->|"Port 80 / Nginx"| Frontend["Frontend Container: HFU Web UI"]
+    Client -->|"Port 8888"| Jupyter["JupyterLab Container: PyTorch & YOLOv11"]
+    Frontend -->|"Proxy /api"| Backend["FastAPI Backend Container"]
+    Backend -->|"OpenCV / v4l2"| Cam["/dev/video0 USB Kamera"]
+    Backend -->|"Shell Exec"| USB["USB Export & Session Reset Scripts"]
 ```
 
 ---
