@@ -58,15 +58,15 @@
       <div class="dashboard-grid">
         <div class="main-col">
           <div class="card">
-            <h2>Willkommen zum Objekterkennungs-Praktikum</h2>
-            <p>Diese autarke KI-Workstation ermöglicht das vollständige Training und die Evaluierung eines modernen <strong>YOLOv11</strong> Neuronalen Netzes direkt auf der <strong>NVIDIA Jetson Orin Nano GPU</strong>.</p>
+            <h2 data-i18n="welcomeTitle">Willkommen zum Objekterkennungs-Praktikum</h2>
+            <p data-i18n="welcomeText">Diese autarke KI-Workstation ermöglicht das vollständige Training und die Evaluierung eines modernen YOLOv11 Neuronalen Netzes direkt auf der NVIDIA Jetson Orin Nano GPU.</p>
             <div style="margin-top: 16px;">
               <a href="http://localhost:8888" target="_blank" class="btn-primary" data-i18n="openJupyter">🚀 JupyterLab Starten</a>
             </div>
           </div>
 
           <div class="card">
-            <h3>Praktikumsablauf (6 Schritte)</h3>
+            <h3 data-i18n="stepsTitle">Praktikumsablauf (6 Schritte)</h3>
             <div class="steps-grid">
               <div class="step-card">
                 <h4 data-i18n="step1">1. Hardware &amp; Fokus</h4>
@@ -99,7 +99,7 @@
         <!-- Sidebar Info -->
         <div class="side-col">
           <div class="card">
-            <h3>Hardware Setup</h3>
+            <h3 data-i18n="hardwareTitle">Hardware Setup</h3>
             <ul style="line-height: 1.8; margin-left: 20px; font-size: 14px; color: var(--text-secondary);">
               <li>NVIDIA Jetson Orin Nano (NVMe SSD)</li>
               <li>USB 3.0 Industriekamera (C-Mount)</li>
@@ -114,8 +114,8 @@
     <!-- Tab 2: Kiosk & Focus Hardware Test -->
     <div class="tab-content" id="tab-kiosk">
       <div class="card">
-        <h2>Live-Kamerabild &amp; Fokus-Messung (Siemensstern)</h2>
-        <p>Stellen Sie den manuellen Fokusring der C-Mount Linse ein, bis die Linien des Siemenssterns im Zentrum scharf abgegrenzt sind.</p>
+        <h2 data-i18n="focusTitle">Live-Kamerabild &amp; Fokus-Messung (Siemensstern)</h2>
+        <p data-i18n="focusDesc">Stellen Sie den manuellen Fokusring der C-Mount Linse ein, bis die Linien des Siemenssterns im Zentrum scharf abgegrenzt sind.</p>
         
         <div class="video-frame-container">
           <img src="http://localhost:8000/api/stream" alt="Live Camera Stream" class="video-stream">
@@ -150,14 +150,14 @@
     <div class="tab-content" id="tab-system">
       <div class="dashboard-grid">
         <div class="card">
-          <h2>Daten-Export auf USB-Stick</h2>
-          <p>Kopiert alle erfassten Bilder, Annotations, trainierte YOLOv11 PyTorch &amp; TensorRT Gewichte sowie den automatisch generierten PDF-Praktikumsbericht auf den angeschlossenen USB-Speicher.</p>
+          <h2 data-i18n="exportTitle">Daten-Export auf USB-Stick</h2>
+          <p data-i18n="exportDesc">Kopiert alle erfassten Bilder, Annotations, trainierte YOLOv11 PyTorch &amp; TensorRT Gewichte sowie den automatisch generierten PDF-Praktikumsbericht auf den angeschlossenen USB-Speicher.</p>
           <button class="btn-primary" id="btn-usb-export" onclick="triggerUSBExport()" data-i18n="exportUSB">💾 Daten auf USB-Stick exportieren</button>
         </div>
 
         <div class="card">
-          <h2>Station Zurücksetzen (System Reset)</h2>
-          <p>Setzt den Arbeitsbereich für das nächste Studierenden-Team zurück (Löscht Datensätze, Gewichte und Auswertungsberichte).</p>
+          <h2 data-i18n="resetTitle">Station Zurücksetzen (System Reset)</h2>
+          <p data-i18n="resetDesc">Setzt den Arbeitsbereich für das nächste Studierenden-Team zurück (Löscht Datensätze, Gewichte und Auswertungsberichte).</p>
           <button class="btn-danger" onclick="triggerResetWorkspace()" data-i18n="resetWorkspace">🗑️ Praktikum Zurücksetzen</button>
         </div>
       </div>
