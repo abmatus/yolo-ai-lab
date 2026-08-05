@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+    container_name: hfu_ai_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - jupyter
+    networks:
+      - ai_lab_net
+
+  backend:
+    build:
+      context: ./backend
+    container_name: hfu_ai_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    devices:
+      - "/dev/video0:/dev/video0"
+    volumes:
+      - ./data:/workspace/data
+      - ./student_data:/workspace/student_data
+      - ./scripts:/app/scripts
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /media:/media
+    environment:
+      - CAMERA_INDEX=0
+      - WORKSPACE_DIR=/workspace/student_data
+    networks:
+      - ai_lab_net
+
+  jupyter:
+    build:
+      context: ./jupyter
+    container_name: hfu_ai_jupyter
+    restart: always
+    ports:
+      - "8888:8888"
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./notebooks:/workspace/notebooks
+      - ./student_data:/workspace/student_data
+      - ./data:/workspace/data
+    networks:
+      - ai_lab_net
+
+networks:
+  ai_lab_net:
+    driver: bridge

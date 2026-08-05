@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HFU AI-LAB | Objekterkennung Workstation</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Header Section -->
+  <header>
+    <div class="brand">
+      <img src="assets/hfu_logo.svg" alt="HFU Logo">
+      <div class="brand-title">
+        <h1 data-i18n="stationTitle">HFU KI-Praktikumsstation</h1>
+        <p data-i18n="subtitle">Autarke Objekterkennung mit YOLOv11 &amp; NVIDIA Jetson Orin Nano</p>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-item">
+        <span class="dot" id="dot-cam"></span>
+        <span data-i18n="camStatus">Kamera</span>
+      </div>
+      <div class="status-item">
+        <span class="dot" id="dot-wlan"></span>
+        <span data-i18n="wlanStatus">WLAN AP</span> (<strong id="ssid-display">AI-LAB-ORIN-01</strong>)
+      </div>
+      <div class="status-item">
+        <span class="dot" id="dot-docker"></span>
+        <span data-i18n="dockerStatus">Docker Containers</span>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <button class="btn-toggle" id="lang-toggle">DE</button>
+      <button class="btn-toggle" id="theme-toggle">🌙 Dark</button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="tabs-nav">
+    <button class="tab-btn active" data-tab="dashboard" data-i18n="tabDashboard">Dashboard &amp; BYOD</button>
+    <button class="tab-btn" data-tab="kiosk" data-i18n="tabKiosk">Hardware- &amp; Fokus-Test</button>
+    <button class="tab-btn" data-tab="demo" data-i18n="tabDemo">Messe- / Demo-Modus</button>
+    <button class="tab-btn" data-tab="system" data-i18n="tabSystem">System &amp; USB Export</button>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="container">
+
+    <!-- Tab 1: Dashboard & BYOD -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="dashboard-grid">
+        <div class="main-col">
+          <div class="card">
+            <h2>Willkommen zum Objekterkennungs-Praktikum</h2>
+            <p>Diese autarke KI-Workstation ermöglicht das vollständige Training und die Evaluierung eines modernen <strong>YOLOv11</strong> Neuronalen Netzes direkt auf der <strong>NVIDIA Jetson Orin Nano GPU</strong>.</p>
+            <div style="margin-top: 16px;">
+              <a href="http://localhost:8888" target="_blank" class="btn-primary" data-i18n="openJupyter">🚀 JupyterLab Starten</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Praktikumsablauf (6 Schritte)</h3>
+            <div class="steps-grid">
+              <div class="step-card">
+                <h4 data-i18n="step1">1. Hardware &amp; Fokus</h4>
+                <p data-i18n="step1Desc">Siemensstern Schärfeeinstellung der Industriekamera.</p>
+              </div>
+              <div class="step-card">
+                <h4 data-i18n="step2">2. COCO Exploration</h4>
+                <p data-i18n="step2Desc">Vertrautheits-Test mit vortrainierten YOLOv11-Klassen.</p>
+              </div>
+              <div class="step-card">
+                <h4 data-i18n="step3">3. Bilderfassung</h4>
+                <p data-i18n="step3Desc">30+ Aufnahmen von OP-Besteck oder IXO-Bauteilen.</p>
+              </div>
+              <div class="step-card">
+                <h4 data-i18n="step4">4. Assisted Labeling</h4>
+                <p data-i18n="step4Desc">KI-unterstützte Annotation &amp; Korrektur.</p>
+              </div>
+              <div class="step-card">
+                <h4 data-i18n="step5">5. YOLOv11 Training</h4>
+                <p data-i18n="step5Desc">Transfer Learning direkt auf der Jetson GPU.</p>
+              </div>
+              <div class="step-card">
+                <h4 data-i18n="step6">6. Real-World Evaluation</h4>
+                <p data-i18n="step6Desc">TensorRT Beschleunigung, mAP &amp; PDF-Protokoll.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="side-col">
+          <div class="card">
+            <h3>Hardware Setup</h3>
+            <ul style="line-height: 1.8; margin-left: 20px; font-size: 14px; color: var(--text-secondary);">
+              <li>NVIDIA Jetson Orin Nano (NVMe SSD)</li>
+              <li>USB 3.0 Industriekamera (C-Mount)</li>
+              <li>Bosch-Lichtbalken (Prüffläche 80x60cm)</li>
+              <li>5GHz Hotspot Access Point (BYOD)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Kiosk & Focus Hardware Test -->
+    <div class="tab-content" id="tab-kiosk">
+      <div class="card">
+        <h2>Live-Kamerabild &amp; Fokus-Messung (Siemensstern)</h2>
+        <p>Stellen Sie den manuellen Fokusring der C-Mount Linse ein, bis die Linien des Siemenssterns im Zentrum scharf abgegrenzt sind.</p>
+        
+        <div class="video-frame-container">
+          <img src="http://localhost:8000/api/stream" alt="Live Camera Stream" class="video-stream">
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 3: Messe / Demo Exhibition Mode -->
+    <div class="tab-content" id="tab-demo">
+      <div class="video-frame-container" style="aspect-ratio: 16 / 9; max-height: 70vh;">
+        <img src="http://localhost:8000/api/stream" alt="Demo Live Stream" class="video-stream">
+        
+        <div class="demo-overlay">
+          <span class="badge">HFU DEMO MODE</span>
+          <span class="stats-badge" id="demo-stats">GPU/CPU: Loading...</span>
+        </div>
+
+        <div class="demo-callout" data-i18n="demoCallout">
+          Lege ein Objekt auf die Prüffläche. Kann die KI es erkennen?
+        </div>
+
+        <!-- Timeout Attract Screen -->
+        <div class="attract-screen" id="attract-screen" style="display: none;">
+          <h2 data-i18n="attractTitle">Willkommen am HFU KI-Praktikumsstand!</h2>
+          <p data-i18n="attractText">Erleben Sie Echtzeit-Objekterkennung auf dem NVIDIA Jetson Orin Nano. Berühren Sie den Bildschirm, um zu starten.</p>
+          <button class="btn-primary" onclick="resetInactivityTimer()">▶ Start Demo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 4: System Tools & USB Export -->
+    <div class="tab-content" id="tab-system">
+      <div class="dashboard-grid">
+        <div class="card">
+          <h2>Daten-Export auf USB-Stick</h2>
+          <p>Kopiert alle erfassten Bilder, Annotations, trainierte YOLOv11 PyTorch &amp; TensorRT Gewichte sowie den automatisch generierten PDF-Praktikumsbericht auf den angeschlossenen USB-Speicher.</p>
+          <button class="btn-primary" id="btn-usb-export" onclick="triggerUSBExport()" data-i18n="exportUSB">💾 Daten auf USB-Stick exportieren</button>
+        </div>
+
+        <div class="card">
+          <h2>Station Zurücksetzen (System Reset)</h2>
+          <p>Setzt den Arbeitsbereich für das nächste Studierenden-Team zurück (Löscht Datensätze, Gewichte und Auswertungsberichte).</p>
+          <button class="btn-danger" onclick="triggerResetWorkspace()" data-i18n="resetWorkspace">🗑️ Praktikum Zurücksetzen</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    &copy; 2026 Hochschule Furtwangen (HFU) | Fakultät Medical and Life Sciences / Maschinenbau &amp; WIng | Powered by Ultralytics YOLOv11 &amp; NVIDIA Jetson
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

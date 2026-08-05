@@ -1,0 +1,24 @@
+# Python / Jupyter
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+*.pt
+*.engine
+*.onnx
+
+# Student Session Data & Reports
+student_data/dataset/images/*
+student_data/dataset/labels/*
+student_data/runs/*
+student_data/reports/*
+
+# Config & Temp Files
+config/ap_ssid.txt
+*.zip
+*.log
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
