@@ -36,7 +36,7 @@ Die Weboberfläche im **"Clean Academic"** Stil basiert auf den offiziellen Corp
 | **Display** | 19-Zoll Monitor für den Stand-/Kiosk-Betrieb |
 | **Netzwerk** | 5GHz Wi-Fi Access Point (`AI-LAB-ORIN-XX`) für BYOD (Laptop der Studierenden) |
 
-> 📌 **JetPack 7.2.1 Installation & Firmware-Gate:** Siehe [`04_Hardware_NVMe_Setup.md`](04_Hardware_NVMe_Setup.md) für den UEFI Firmware Check (>= 36.x), den 30-Sekunden Countdown und die `MAXN SUPER` Power-Konfiguration.
+> 📌 **JetPack 7.2.1 Installation & Firmware-Gate:** Siehe [`04_Hardware_NVMe_Setup.md`](04_Hardware_NVMe_Setup.md) (basierend auf dem offiziellen [NVIDIA Quick Start Guide](https://docs.nvidia.com/jetson/orin-nano-devkit/user-guide/latest/quick_start.html)) für den UEFI Firmware Check (>= 36.x), den 30-Sekunden Countdown und die `MAXN SUPER` Power-Konfiguration.
 
 ### Docker-Container-Architektur
 
