@@ -5,7 +5,7 @@ import threading
 import cv2
 import numpy as np
 import psutil
-from fastapi import FastAPI, Response
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 
@@ -44,105 +44,85 @@ def generate_siemens_star_fallback():
     return img
 
 
-def check_camera_index_with_timeout(idx):
-    """Runs an isolated 2-second subprocess to check if camera index works without hanging."""
-    test_script = f"""
+def grab_frame_subprocess(idx):
+    """Isolated 1.5s subprocess to capture frame without risking main process hang."""
+    script = f"""
 import cv2, numpy as np, sys
 try:
     cap = cv2.VideoCapture({idx}, cv2.CAP_V4L2)
     if cap.isOpened():
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         ret, frame = cap.read()
         cap.release()
         if ret and frame is not None and np.mean(frame) > 2.0:
-            sys.exit(0)
+            ret_bytes, jpg = cv2.imencode('.jpg', frame)
+            if ret_bytes:
+                sys.stdout.buffer.write(jpg.tobytes())
+                sys.exit(0)
 except Exception:
     pass
 sys.exit(1)
 """
     try:
-        res = subprocess.run(["python3", "-c", test_script], timeout=2.0, capture_output=True)
-        return res.returncode == 0
+        res = subprocess.run(["python3", "-c", script], timeout=1.5, capture_output=True)
+        if res.returncode == 0 and len(res.stdout) > 500:
+            frame = cv2.imdecode(np.frombuffer(res.stdout, dtype=np.uint8), cv2.IMREAD_COLOR)
+            if frame is not None:
+                return frame, True
     except subprocess.TimeoutExpired:
-        print(f"[CAMERA] Index {idx} timed out (CSI/Driver hanging node skipped).")
-        return False
+        pass
+    return None, False
 
 
-# Subprocess-Protected Non-Blocking Camera Manager
-class CameraManager:
+# Non-Blocking Background Stream Engine
+class StreamEngine:
     def __init__(self):
-        self.cap = None
-        self.active_index = -1
-        self.is_real = False
         self.current_frame = generate_siemens_star_fallback()
+        self.is_real = False
+        self.active_index = -1
         self.lock = threading.Lock()
         self.running = True
-        self.thread = threading.Thread(target=self._update_loop, daemon=True)
+        self.thread = threading.Thread(target=self._loop, daemon=True)
         self.thread.start()
 
-    def _try_open_camera(self):
-        indices_to_try = [CAM_ID] + [i for i in range(4) if i != CAM_ID]
-        for idx in indices_to_try:
-            device_path = f"/dev/video{idx}"
-            if os.path.exists(device_path):
-                # Verify index with timeout first so OpenCV never hangs the server
-                if check_camera_index_with_timeout(idx):
-                    cap = cv2.VideoCapture(idx, cv2.CAP_V4L2)
-                    if cap.isOpened():
-                        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-                        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-                        ret, frame = cap.read()
-                        if ret and frame is not None and np.mean(frame) > 2.0:
-                            self.cap = cap
-                            self.active_index = idx
-                            self.is_real = True
-                            print(f"[CAMERA] Successfully opened USB webcam on {device_path}")
-                            return True
-                        cap.release()
-
-        self.is_real = False
-        self.cap = None
-        return False
-
-    def _update_loop(self):
-        """Dedicated background thread reading V4L2 device safely."""
+    def _loop(self):
         while self.running:
-            if self.cap is None or not self.cap.isOpened():
-                if not self._try_open_camera():
-                    with self.lock:
-                        self.current_frame = generate_siemens_star_fallback()
-                        self.is_real = False
-                    time.sleep(2.0)
-                    continue
+            found = False
+            indices_to_try = [CAM_ID] + [i for i in range(4) if i != CAM_ID]
+            for idx in indices_to_try:
+                if os.path.exists(f"/dev/video{idx}"):
+                    frame, is_real = grab_frame_subprocess(idx)
+                    if is_real and frame is not None:
+                        with self.lock:
+                            self.current_frame = frame
+                            self.is_real = True
+                            self.active_index = idx
+                        found = True
+                        break
 
-            ret, frame = self.cap.read()
-            if ret and frame is not None and np.mean(frame) > 2.0:
-                with self.lock:
-                    self.current_frame = frame
-                    self.is_real = True
-            else:
-                if self.cap:
-                    self.cap.release()
-                    self.cap = None
+            if not found:
                 with self.lock:
                     self.current_frame = generate_siemens_star_fallback()
                     self.is_real = False
+                    self.active_index = -1
                 time.sleep(1.0)
+            else:
+                time.sleep(0.04) # ~25 FPS
 
-            time.sleep(0.04) # ~25 FPS
-
-    def get_latest_frame(self):
+    def get_frame(self):
         with self.lock:
-            return self.current_frame.copy(), self.is_real
+            return self.current_frame.copy(), self.is_real, self.active_index
 
-camera_mgr = CameraManager()
+stream_engine = StreamEngine()
 
 
 def mjpeg_stream_generator():
     """MJPEG stream generator serving multiple client tabs smoothly."""
     while True:
-        frame, is_real_cam = camera_mgr.get_latest_frame()
+        frame, is_real_cam, active_idx = stream_engine.get_frame()
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        status_text = f"CAM: ONLINE (/dev/video{camera_mgr.active_index})" if is_real_cam else "CAM: SIMULATED (DEMO)"
+        status_text = f"CAM: ONLINE (/dev/video{active_idx})" if is_real_cam else "CAM: SIMULATED (DEMO)"
         color = (0, 200, 0) if is_real_cam else (0, 165, 255)
         
         cv2.putText(frame, f"{status_text} | {timestamp}", (10, frame.shape[0] - 15),
@@ -166,7 +146,7 @@ def video_feed():
 @app.get("/api/status")
 def system_status():
     """Comprehensive Hardware & Environment Status Endpoint."""
-    cam_online = camera_mgr.is_real
+    frame, cam_online, active_idx = stream_engine.get_frame()
 
     # Get RAM & CPU
     mem = psutil.virtual_memory()
@@ -188,8 +168,8 @@ def system_status():
         "station": "HFU Jetson Orin Nano AI-Workstation",
         "camera": {
             "online": cam_online,
-            "device": f"/dev/video{camera_mgr.active_index}" if cam_online else "/dev/video0",
-            "mode": f"Real USB Webcam (/dev/video{camera_mgr.active_index})" if cam_online else "Siemens Star Fallback"
+            "device": f"/dev/video{active_idx}" if cam_online else "/dev/video0",
+            "mode": f"Real USB Webcam (/dev/video{active_idx})" if cam_online else "Siemens Star Fallback"
         },
         "wlan": {
             "ssid": ssid,
