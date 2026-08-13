@@ -31,6 +31,7 @@ app.add_middleware(
 
 # UGREEN UVC Webcam confirmed on /dev/video0 (Jetson Orin Nano, L4T r39.2)
 CAM_INDEX   = int(os.getenv("CAMERA_INDEX", "0"))
+CAM_PATH    = f"/dev/video{CAM_INDEX}"   # open by path, not index (more reliable in containers)
 TARGET_FPS  = 25
 WORKSPACE_DIR = os.getenv("WORKSPACE_DIR", "/workspace/student_data")
 
@@ -84,34 +85,30 @@ class StreamEngine:
 
     # ------------------------------------------------------------------
     def _open(self) -> Optional[cv2.VideoCapture]:
-        print(f"[CAM] Opening /dev/video{CAM_INDEX} …")
-        cap = cv2.VideoCapture(CAM_INDEX, cv2.CAP_V4L2)
+        print(f"[CAM] Opening {CAM_PATH} (path mode, V4L2) …")
+        # Open by DEVICE PATH STRING, not integer index.
+        # In Docker containers, integer index resolution can differ from the host.
+        cap = cv2.VideoCapture(CAM_PATH, cv2.CAP_V4L2)
         if not cap.isOpened():
-            print(f"[CAM] ❌ Cannot open /dev/video{CAM_INDEX}")
+            print(f"[CAM] ❌ Cannot open {CAM_PATH}")
             return None
 
-        # Set resolution and FPS — do NOT force FOURCC/MJPG here.
-        # Forcing MJPG can silently fail on some UVC cameras (UGREEN included)
-        # and causes the driver to return empty/black frames.
-        # Let V4L2 negotiate the best native format (YUYV or MJPG).
         cap.set(cv2.CAP_PROP_FRAME_WIDTH,  640)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         cap.set(cv2.CAP_PROP_FPS, TARGET_FPS)
-        cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
-        # Drain stale buffer — UVC cameras queue old/empty frames on open.
-        # 20 grabs gives the auto-exposure time to stabilize.
-        print(f"[CAM] Draining buffer on /dev/video{CAM_INDEX} …")
-        for _ in range(20):
-            cap.grab()
+        # Read directly — no grab() warmup (grab+read can desync on some UVC firmware)
+        print(f"[CAM] Waiting for first live frame from {CAM_PATH} …")
+        for attempt in range(30):
+            ret, frame = cap.read()
+            if ret and frame is not None and frame.size > 0:
+                mean = float(np.mean(frame))
+                print(f"[CAM] ✅ {CAM_PATH} ready after {attempt+1} reads — brightness: {mean:.1f}")
+                return cap
+            time.sleep(0.05)
 
-        ret, frame = cap.read()
-        if ret and frame is not None and frame.size > 0:
-            mean = float(__import__('numpy').mean(frame))
-            print(f"[CAM] ✅ /dev/video{CAM_INDEX} ready — LED ON — mean brightness: {mean:.1f}")
-            return cap
-
-        print(f"[CAM] ❌ /dev/video{CAM_INDEX} opened but returned no frame (ret={ret})")
+        print(f"[CAM] ❌ {CAM_PATH} opened but no valid frame after 30 attempts")
         cap.release()
         return None
 
@@ -138,7 +135,8 @@ class StreamEngine:
             if ret and frame is not None and frame.size > 0:
                 consecutive_failures = 0
                 ts = time.strftime("%H:%M:%S")
-                cv2.putText(frame, f"/dev/video{CAM_INDEX} | {ts}",
+                label = f"CAM {CAM_PATH} | {ts}" if self.is_real else f"DEMO MODE | {ts}"
+                cv2.putText(frame, label,
                             (10, frame.shape[0] - 12),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 220, 0), 1, cv2.LINE_AA)
                 _, buf = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
@@ -148,8 +146,8 @@ class StreamEngine:
                 self._frame_event.set()
             else:
                 consecutive_failures += 1
-                if consecutive_failures >= 30:
-                    print("[CAM] ⚠️  Stream lost — releasing and reconnecting …")
+                if consecutive_failures >= 60:   # 60 × ~33ms = ~2s before reconnect
+                    print(f"[CAM] ⚠️  Stream lost ({consecutive_failures} failures) — reconnecting …")
                     self._cap.release()
                     self._cap = None
                     consecutive_failures = 0
@@ -157,7 +155,7 @@ class StreamEngine:
                         self._jpeg = _make_siemens_star("Reconnecting…")
                         self.is_real = False
                     self._frame_event.set()
-                    time.sleep(1.0)
+                    time.sleep(2.0)
                 # no sleep here — let cap.read() block naturally
 
     # ------------------------------------------------------------------
@@ -219,8 +217,8 @@ def system_status():
         "station": "HFU Jetson Orin Nano AI-Workstation",
         "camera": {
             "online": cam_online,
-            "device": f"/dev/video{CAM_INDEX}",
-            "mode": f"UGREEN UVC (/dev/video{CAM_INDEX})" if cam_online else "Siemens Star Fallback",
+            "device": CAM_PATH,
+            "mode": f"UGREEN UVC ({CAM_PATH})" if cam_online else "Siemens Star Fallback",
         },
         "wlan":   {"ssid": ssid, "ip": "192.168.4.1", "active": True},
         "docker": {"frontend": "running", "backend": "running", "jupyter": "running"},
