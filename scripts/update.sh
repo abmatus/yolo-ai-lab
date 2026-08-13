@@ -8,6 +8,18 @@ echo "======================================================================"
 echo "          HFU AI Workstation - System Startup & Auto-Update"
 echo "======================================================================"
 
+# Docker Compose Helper Function (Supports both docker compose & docker-compose)
+run_compose() {
+    if command -v docker-compose &> /dev/null; then
+        docker-compose "$@"
+    elif docker compose version &> /dev/null; then
+        docker compose "$@"
+    else
+        echo "[ERROR] Neither 'docker-compose' nor 'docker compose' is installed!"
+        exit 1
+    fi
+}
+
 # 1. Quick network check (2-second timeout to github.com)
 echo "[NETWORK CHECK] Testing internet connectivity to GitHub..."
 if curl -s --connect-timeout 2 -I https://github.com > /dev/null; then
@@ -29,8 +41,8 @@ if [ "$ONLINE" = true ]; then
         echo "[AUTO-UPDATE] 🚀 New version found! Pulling updates from GitHub..."
         git pull origin main
         echo "[AUTO-UPDATE] Rebuilding Docker containers with latest update..."
-        docker-compose down
-        docker-compose up --build -d
+        run_compose down
+        run_compose up --build -d
         echo "[AUTO-UPDATE] System successfully updated!"
         exit 0
     else
@@ -40,7 +52,7 @@ fi
 
 # 3. Start Docker Containers (Works 100% Offline)
 echo "[DOCKER] Ensuring local Docker containers are running..."
-docker-compose up -d
+run_compose up -d
 
 echo "======================================================================"
 echo "[SUCCESS] HFU AI Workstation is ACTIVE & READY."
