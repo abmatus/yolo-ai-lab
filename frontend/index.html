@@ -61,7 +61,7 @@
             <h2 data-i18n="welcomeTitle">Willkommen zum Objekterkennungs-Praktikum</h2>
             <p data-i18n="welcomeText">Diese autarke KI-Workstation ermöglicht das vollständige Training und die Evaluierung eines modernen YOLOv11 Neuronalen Netzes direkt auf der NVIDIA Jetson Orin Nano GPU.</p>
             <div style="margin-top: 16px;">
-              <a href="http://localhost:8888" target="_blank" class="btn-primary" data-i18n="openJupyter">🚀 JupyterLab Starten</a>
+              <a href="#" id="btn-jupyter-link" target="_blank" class="btn-primary" data-i18n="openJupyter">🚀 JupyterLab Starten</a>
             </div>
           </div>
 
@@ -118,7 +118,7 @@
         <p data-i18n="focusDesc">Stellen Sie den manuellen Fokusring der C-Mount Linse ein, bis die Linien des Siemenssterns im Zentrum scharf abgegrenzt sind.</p>
         
         <div class="video-frame-container">
-          <img src="http://localhost:8000/api/stream" alt="Live Camera Stream" class="video-stream">
+          <img src="/api/stream" alt="Live Camera Stream" class="video-stream">
         </div>
       </div>
     </div>
@@ -126,7 +126,7 @@
     <!-- Tab 3: Messe / Demo Exhibition Mode -->
     <div class="tab-content" id="tab-demo">
       <div class="video-frame-container" style="aspect-ratio: 16 / 9; max-height: 70vh;">
-        <img src="http://localhost:8000/api/stream" alt="Demo Live Stream" class="video-stream">
+        <img src="/api/stream" alt="Demo Live Stream" class="video-stream">
         
         <div class="demo-overlay">
           <span class="badge">HFU DEMO MODE</span>

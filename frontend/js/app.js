@@ -96,9 +96,19 @@ document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   initLanguage();
   initTabs();
+  initDynamicLinks();
   startStatusPolling();
   initAttractMode();
 });
+
+// Dynamic Links setup (JupyterLab port 8888 according to host IP/hostname)
+function initDynamicLinks() {
+  const jupyterBtn = document.getElementById("btn-jupyter-link");
+  if (jupyterBtn) {
+    const host = window.location.hostname || "localhost";
+    jupyterBtn.href = `http://${host}:8888`;
+  }
+}
 
 // Theme Management
 function initTheme() {
@@ -158,7 +168,7 @@ function initTabs() {
   });
 }
 
-// System Status Polling
+// System Status Polling (Using relative endpoint /api/status via Nginx)
 function startStatusPolling() {
   fetchStatus();
   setInterval(fetchStatus, 3000);
@@ -166,7 +176,7 @@ function startStatusPolling() {
 
 async function fetchStatus() {
   try {
-    const res = await fetch("http://localhost:8000/api/status");
+    const res = await fetch("/api/status");
     if (res.ok) {
       const data = await res.json();
       updateDot("dot-cam", data.camera.online);
@@ -222,13 +232,13 @@ function showAttractMode() {
   }
 }
 
-// USB Export Handler
+// USB Export Handler (Using relative /api/export-usb)
 async function triggerUSBExport() {
   const btn = document.getElementById("btn-usb-export");
   btn.disabled = true;
   btn.textContent = "⏳ Exporting...";
   try {
-    const res = await fetch("http://localhost:8000/api/export-usb", { method: "POST" });
+    const res = await fetch("/api/export-usb", { method: "POST" });
     const data = await res.json();
     alert(data.success ? i18n[currentLang].usbExportSuccess : `Export Result: ${data.output || data.error}`);
   } catch (e) {
@@ -239,11 +249,11 @@ async function triggerUSBExport() {
   }
 }
 
-// Reset Workspace Handler
+// Reset Workspace Handler (Using relative /api/reset)
 async function triggerResetWorkspace() {
   if (confirm(currentLang === "de" ? "Praktikumsdaten wirklich zurücksetzen?" : "Reset all student images, annotations and models?")) {
     try {
-      const res = await fetch("http://localhost:8000/api/reset", { method: "POST" });
+      const res = await fetch("/api/reset", { method: "POST" });
       const data = await res.json();
       alert(data.success ? i18n[currentLang].systemResetSuccess : `Reset Error: ${data.error}`);
     } catch (e) {
