@@ -14,7 +14,7 @@
   <!-- Header Section -->
   <header>
     <div class="brand">
-      <img src="assets/hfu_logo.svg" alt="HFU Logo">
+      <img src="assets/hfu_logo.svg" alt="HFU Logo" style="cursor:pointer;" onclick="showAdminLogin()">
       <div class="brand-title">
         <h1 data-i18n="stationTitle">HFU KI-Praktikumsstation</h1>
         <p data-i18n="subtitle">Autarke Objekterkennung mit YOLOv11 &amp; NVIDIA Jetson Orin Nano</p>
@@ -32,7 +32,7 @@
       </div>
       <div class="status-item">
         <span class="dot" id="dot-docker"></span>
-        <span data-i18n="dockerStatus">Docker Containers</span>
+        <span data-i18n="dockerStatus">System</span>
       </div>
     </div>
 
@@ -43,186 +43,278 @@
   </header>
 
   <!-- Navigation Tabs -->
-  <nav class="tabs-nav">
-    <button class="tab-btn active" data-tab="dashboard" data-i18n="tabDashboard">Dashboard &amp; BYOD</button>
-    <button class="tab-btn" data-tab="kiosk" data-i18n="tabKiosk">Hardware- &amp; Fokus-Test</button>
-    <button class="tab-btn" data-tab="demo" data-i18n="tabDemo">Messe- / Demo-Modus</button>
-    <button class="tab-btn" data-tab="system" data-i18n="tabSystem">System &amp; USB Export</button>
+  <nav class="tabs-nav" id="main-nav">
+    <button class="tab-btn active" data-tab="dashboard" data-i18n="tabDashboard">Dashboard</button>
+    <button class="tab-btn" data-tab="kiosk" data-i18n="step1">1. Fokus</button>
+    <button class="tab-btn" data-tab="coco" data-i18n="step2">2. COCO Live</button>
+    <button class="tab-btn" data-tab="capture" data-i18n="step3">3. Aufnahme</button>
+    <button class="tab-btn" data-tab="labeling" data-i18n="step4">4. Labeling</button>
+    <button class="tab-btn" data-tab="training" data-i18n="step5">5. Training</button>
+    <button class="tab-btn" data-tab="admin" id="nav-admin" style="display:none;">Admin</button>
   </nav>
 
-  <!-- Main Content Area -->
-  <main class="container">
+  <!-- Tab 1: Dashboard -->
+  <div class="tab-content active" id="tab-dashboard">
+    <div class="card">
+      <h2 data-i18n="welcomeTitle">Willkommen zum Objekterkennungs-Praktikum</h2>
+      <p data-i18n="welcomeText">Diese autarke KI-Workstation ermöglicht das vollständige Training und die Evaluierung eines modernen YOLOv11 Neuronalen Netzes direkt auf der NVIDIA Jetson Orin Nano GPU.</p>
+    </div>
+    
+    <h3 data-i18n="stepsTitle" style="margin: 20px 0 10px;">Praktikumsablauf</h3>
+    <div class="steps-grid">
+      <div class="step-card" onclick="switchTab('kiosk')">
+        <h4 data-i18n="step1">1. Hardware &amp; Fokus</h4>
+        <p data-i18n="step1Desc">Siemensstern Schärfeeinstellung.</p>
+      </div>
+      <div class="step-card" onclick="switchTab('coco')">
+        <h4 data-i18n="step2">2. COCO Exploration</h4>
+        <p data-i18n="step2Desc">Vertrautheits-Test YOLOv11.</p>
+      </div>
+      <div class="step-card" onclick="switchTab('capture')">
+        <h4 data-i18n="step3">3. Bilderfassung</h4>
+        <p data-i18n="step3Desc">Aufnahmen vom Bauteil.</p>
+      </div>
+      <div class="step-card" onclick="switchTab('labeling')">
+        <h4 data-i18n="step4">4. Assisted Labeling</h4>
+        <p data-i18n="step4Desc">KI-unterstützte Annotation.</p>
+      </div>
+      <div class="step-card" onclick="switchTab('training')">
+        <h4 data-i18n="step5">5. YOLOv11 Training</h4>
+        <p data-i18n="step5Desc">Transfer Learning auf Jetson.</p>
+      </div>
+      <div class="step-card" onclick="switchTab('training')">
+        <h4 data-i18n="step6">6. Real-World Evaluation</h4>
+        <p data-i18n="step6Desc">mAP &amp; PDF-Protokoll.</p>
+      </div>
+    </div>
+  </div>
 
-    <!-- Tab 1: Dashboard & BYOD -->
-    <div class="tab-content active" id="tab-dashboard">
-      <div class="dashboard-grid">
-        <div class="main-col">
-          <div class="card">
-            <h2 data-i18n="welcomeTitle">Willkommen zum Objekterkennungs-Praktikum</h2>
-            <p data-i18n="welcomeText">Diese autarke KI-Workstation ermöglicht das vollständige Training und die Evaluierung eines modernen YOLOv11 Neuronalen Netzes direkt auf der NVIDIA Jetson Orin Nano GPU.</p>
-            <div style="margin-top: 16px;">
-              <a href="#" id="btn-jupyter-link" target="_blank" class="btn-primary" data-i18n="openJupyter">🚀 JupyterLab Starten</a>
-            </div>
-          </div>
-
-          <div class="card">
-            <h3 data-i18n="stepsTitle">Praktikumsablauf (6 Schritte)</h3>
-            <div class="steps-grid">
-              <div class="step-card">
-                <h4 data-i18n="step1">1. Hardware &amp; Fokus</h4>
-                <p data-i18n="step1Desc">Siemensstern Schärfeeinstellung der Industriekamera.</p>
-              </div>
-              <div class="step-card">
-                <h4 data-i18n="step2">2. COCO Exploration</h4>
-                <p data-i18n="step2Desc">Vertrautheits-Test mit vortrainierten YOLOv11-Klassen.</p>
-              </div>
-              <div class="step-card">
-                <h4 data-i18n="step3">3. Bilderfassung</h4>
-                <p data-i18n="step3Desc">30+ Aufnahmen von OP-Besteck oder IXO-Bauteilen.</p>
-              </div>
-              <div class="step-card">
-                <h4 data-i18n="step4">4. Assisted Labeling</h4>
-                <p data-i18n="step4Desc">KI-unterstützte Annotation &amp; Korrektur.</p>
-              </div>
-              <div class="step-card">
-                <h4 data-i18n="step5">5. YOLOv11 Training</h4>
-                <p data-i18n="step5Desc">Transfer Learning direkt auf der Jetson GPU.</p>
-              </div>
-              <div class="step-card">
-                <h4 data-i18n="step6">6. Real-World Evaluation</h4>
-                <p data-i18n="step6Desc">TensorRT Beschleunigung, mAP &amp; PDF-Protokoll.</p>
-              </div>
+  <!-- Tab 2: Focus (Kiosk) -->
+  <div class="tab-content" id="tab-kiosk">
+    <div class="card focus-card">
+      <h2 data-i18n="focusTitle">Live-Kamerabild &amp; Fokus-Messung (Siemensstern)</h2>
+      <p data-i18n="focusDesc">Stellen Sie den manuellen Fokusring ein, bis die Linien scharf sind.</p>
+      <div class="focus-layout">
+        <div class="focus-video-wrapper">
+          <div class="video-frame-container">
+            <img id="cam-stream-main" src="" alt="Live Camera Stream" class="video-stream">
+            <div class="focus-roi-box">
+              <span class="focus-roi-label" data-i18n="focusMeasArea">Messbereich</span>
             </div>
           </div>
         </div>
+        <div class="focus-panel">
+          <div class="focus-score-display">
+            <div class="focus-score-value" id="focus-score-num">--</div>
+            <div class="focus-score-unit">/ 100</div>
+          </div>
+          <div class="focus-label-badge" id="focus-label-badge">Messe...</div>
+          <div class="focus-gauge-track">
+            <div class="focus-gauge-fill" id="focus-gauge-fill" style="width:0%"></div>
+            <div class="focus-gauge-markers">
+              <span>0</span><span>30</span><span>60</span><span>85</span><span>100</span>
+            </div>
+          </div>
+          <div class="focus-zones">
+            <span class="zone zone-bad" data-i18n="zoneBlurry">Unscharf</span>
+            <span class="zone zone-ok" data-i18n="zoneOk">Mittelmäßig</span>
+            <span class="zone zone-good" data-i18n="zoneGood">Gut</span>
+            <span class="zone zone-sharp" data-i18n="zoneSharp">Scharf</span>
+          </div>
+          <div class="focus-detail">
+            <div class="focus-detail-row">
+              <span data-i18n="focusVarRow">Laplace-Varianz</span>
+              <strong id="focus-raw-var">--</strong>
+            </div>
+          </div>
+          <div class="focus-hint" id="focus-hint">🎯 Platzieren Sie den Siemensstern...</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- Sidebar Info -->
-        <div class="side-col">
-          <div class="card">
-            <h3 data-i18n="hardwareTitle">Hardware Setup</h3>
-            <ul style="line-height: 1.8; margin-left: 20px; font-size: 14px; color: var(--text-secondary);">
-              <li>NVIDIA Jetson Orin Nano (NVMe SSD)</li>
-              <li>USB 3.0 Industriekamera (C-Mount)</li>
-              <li>Bosch-Lichtbalken (Prüffläche 80x60cm)</li>
-              <li>5GHz Hotspot Access Point (BYOD)</li>
-            </ul>
+  <!-- Tab 3: COCO Live Inference -->
+  <div class="tab-content" id="tab-coco">
+    <div class="card coco-card">
+      <h2>Live YOLO Inferenz</h2>
+      <div class="coco-layout">
+        <div class="video-frame-container">
+          <img id="cam-stream-infer" src="" alt="Live Inference" class="video-stream">
+        </div>
+        <div class="coco-controls">
+          <div class="control-group">
+            <label>Modell</label>
+            <select id="coco-model-select" onchange="updateInferConfig()"></select>
+          </div>
+          <div class="control-group">
+            <label>Confidence (<span id="conf-val">0.45</span>)</label>
+            <input type="range" id="coco-conf" min="0.1" max="0.9" step="0.05" value="0.45" oninput="updateInferConfig()">
+          </div>
+          <div class="control-group" style="flex-direction: row; align-items: center;">
+            <input type="checkbox" id="coco-show-boxes" checked onchange="updateInferConfig()">
+            <label for="coco-show-boxes">Bounding Boxes anzeigen</label>
+          </div>
+          <div class="stats-panel">
+            <h4>Live Statistik</h4>
+            <p>FPS: <span id="infer-fps">--</span></p>
+            <p>Inferenz: <span id="infer-ms">--</span> ms</p>
+            <div id="infer-dets" class="detections-list"></div>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Tab 2: Kiosk & Focus Hardware Test -->
-    <div class="tab-content" id="tab-kiosk">
-      <div class="card focus-card">
-        <h2 data-i18n="focusTitle">Live-Kamerabild &amp; Fokus-Messung (Siemensstern)</h2>
-        <p data-i18n="focusDesc">Stellen Sie den manuellen Fokusring der C-Mount Linse ein, bis die Linien des Siemenssterns im Zentrum scharf abgegrenzt sind.</p>
-
-        <div class="focus-layout">
-          <!-- Video with center crosshair overlay -->
-          <div class="focus-video-wrapper">
-            <div class="video-frame-container">
-              <img id="cam-stream-main" src="" alt="Live Camera Stream" class="video-stream">
-              <!-- Measurement zone indicator -->
-              <div class="focus-roi-box">
-                <span class="focus-roi-label" data-i18n="focusMeasArea">Messbereich</span>
-              </div>
-            </div>
+  <!-- Tab 4: Capture (Kamera-App) -->
+  <div class="tab-content" id="tab-capture">
+    <div class="card capture-card">
+      <div class="capture-layout">
+        <div class="capture-main">
+          <div class="video-frame-container">
+            <img id="cam-stream-capture" src="" alt="Capture Stream" class="video-stream">
           </div>
-
-          <!-- Focus meter panel -->
-          <div class="focus-panel">
-            <div class="focus-score-display">
-              <div class="focus-score-value" id="focus-score-num">--</div>
-              <div class="focus-score-unit">/ 100</div>
-            </div>
-
-            <div class="focus-label-badge" id="focus-label-badge">Messe...</div>
-
-            <!-- Gauge bar -->
-            <div class="focus-gauge-track">
-              <div class="focus-gauge-fill" id="focus-gauge-fill" style="width:0%"></div>
-              <div class="focus-gauge-markers">
-                <span>0</span><span>30</span><span>60</span><span>85</span><span>100</span>
-              </div>
-            </div>
-
-            <!-- Zone labels -->
-            <div class="focus-zones">
-              <span class="zone zone-bad" data-i18n="zoneBlurry">Unscharf</span>
-              <span class="zone zone-ok" data-i18n="zoneOk">Mittelmäßig</span>
-              <span class="zone zone-good" data-i18n="zoneGood">Gut</span>
-              <span class="zone zone-sharp" data-i18n="zoneSharp">Scharf</span>
-            </div>
-
-            <div class="focus-detail">
-              <div class="focus-detail-row">
-                <span data-i18n="focusVarRow">Laplace-Varianz</span>
-                <strong id="focus-raw-var">--</strong>
-              </div>
-              <div class="focus-detail-row">
-                <span data-i18n="focusAreaRow">Messbereich</span>
-                <strong data-i18n="focusAreaValue">Zentrum 40%</strong>
-              </div>
-              <div class="focus-detail-row">
-                <span data-i18n="focusAlgoRow">Algorithmus</span>
-                <strong data-i18n="focusAlgoValue">Laplacian σ²</strong>
-              </div>
-            </div>
-
-            <div class="focus-hint" id="focus-hint">
-              🎯 Platzieren Sie den Siemensstern im Messbereich und drehen Sie am Fokusring bis der Score maximal ist.
-            </div>
-          </div>
+          <button class="btn-primary btn-large" id="btn-capture" onclick="captureImage()">📸 Bild aufnehmen</button>
+        </div>
+        <div class="capture-gallery">
+          <h3>Galerie (<span id="gallery-count">0</span>)</h3>
+          <div class="gallery-grid" id="gallery-grid"></div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Tab 3: Messe / Demo Exhibition Mode -->
-    <div class="tab-content" id="tab-demo">
-      <div class="video-frame-container" style="aspect-ratio: 16 / 9; max-height: 70vh;">
-        <img id="cam-stream-demo" src="" alt="Demo Live Stream" class="video-stream">
+  <!-- Tab 5: Labeling (Canvas Annotator) -->
+  <div class="tab-content" id="tab-labeling">
+    <div class="card labeling-card">
+      <div class="labeling-layout">
+        <!-- Sidebar: Image List -->
+        <div class="labeling-sidebar">
+          <h3>Bilder</h3>
+          <div class="image-list" id="labeling-image-list"></div>
+        </div>
+        <!-- Main: Canvas -->
+        <div class="labeling-main">
+          <div class="canvas-container" id="canvas-container">
+            <canvas id="annotator-canvas"></canvas>
+            <img id="annotator-img" style="display:none;" crossorigin="anonymous">
+          </div>
+          <div class="annotator-controls">
+            <button class="btn-secondary" onclick="runAssistedLabeling()">🤖 Assisted Labeling</button>
+            <button class="btn-primary" onclick="saveAnnotations()">💾 Speichern</button>
+          </div>
+        </div>
+        <!-- Right: Classes & Boxes -->
+        <div class="labeling-right">
+          <h3>Klassen</h3>
+          <div id="class-list" class="class-list"></div>
+          <div class="add-class">
+            <input type="text" id="new-class-name" placeholder="Neue Klasse">
+            <button onclick="addClass()">+</button>
+          </div>
+          <h3 style="margin-top:20px;">Boxes (Aktuelles Bild)</h3>
+          <div id="box-list" class="box-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 6: Training & Eval -->
+  <div class="tab-content" id="tab-training">
+    <div class="card training-card">
+      <h2>Training &amp; Evaluation</h2>
+      <div class="training-layout">
+        <div class="training-config">
+          <div class="control-group">
+            <label>Trainingsserver URL (leer für lokal)</label>
+            <input type="text" id="train-url" placeholder="http://server:port">
+          </div>
+          <div class="control-group">
+            <label>Epochen</label>
+            <input type="number" id="train-epochs" value="50">
+          </div>
+          <div class="control-group">
+            <label>Modell</label>
+            <select id="train-model">
+              <option value="yolo11n">YOLOv11 Nano</option>
+              <option value="yolo11s">YOLOv11 Small</option>
+            </select>
+          </div>
+          <button class="btn-primary" id="btn-train-start" onclick="startTraining()">▶ Training starten</button>
+          <button class="btn-secondary" id="btn-train-stop" onclick="stopTraining()" style="display:none;">⏹ Stoppen</button>
+        </div>
         
-        <div class="demo-overlay">
-          <span class="badge">HFU DEMO MODE</span>
-          <span class="stats-badge" id="demo-stats">GPU/CPU: Loading...</span>
+        <div class="training-status">
+          <h3>Status: <span id="train-status-badge">Idle</span></h3>
+          <div class="progress-bar"><div class="progress-fill" id="train-progress"></div></div>
+          <p>Epoche: <span id="train-epoch">0</span> / <span id="train-total">0</span> | Loss: <span id="train-loss">0</span></p>
+          <pre class="train-log" id="train-log"></pre>
         </div>
-
-        <div class="demo-callout" data-i18n="demoCallout">
-          Lege ein Objekt auf die Prüffläche. Kann die KI es erkennen?
-        </div>
-
-        <!-- Timeout Attract Screen -->
-        <div class="attract-screen" id="attract-screen" style="display: none;">
-          <h2 data-i18n="attractTitle">Willkommen am HFU KI-Praktikumsstand!</h2>
-          <p data-i18n="attractText">Erleben Sie Echtzeit-Objekterkennung auf dem NVIDIA Jetson Orin Nano. Berühren Sie den Bildschirm, um zu starten.</p>
-          <button class="btn-primary" onclick="resetInactivityTimer()">▶ Start Demo</button>
+      </div>
+      
+      <hr style="margin:20px 0; border:1px solid var(--border-color);">
+      
+      <div class="eval-layout">
+        <button class="btn-secondary" onclick="runEvaluation()">📊 Evaluation ausführen</button>
+        <div id="eval-results" class="eval-results"></div>
+        
+        <div class="export-actions">
+          <button class="btn-primary" onclick="generateReport()">📄 PDF Protokoll</button>
+          <button class="btn-primary" onclick="window.location.href='/api/export/zip'">📦 ZIP Export</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Tab 4: System Tools & USB Export -->
-    <div class="tab-content" id="tab-system">
-      <div class="dashboard-grid">
-        <div class="card">
-          <h2 data-i18n="exportTitle">Daten-Export auf USB-Stick</h2>
-          <p data-i18n="exportDesc">Kopiert alle erfassten Bilder, Annotations, trainierte YOLOv11 PyTorch &amp; TensorRT Gewichte sowie den automatisch generierten PDF-Praktikumsbericht auf den angeschlossenen USB-Speicher.</p>
-          <button class="btn-primary" id="btn-usb-export" onclick="triggerUSBExport()" data-i18n="exportUSB">💾 Daten auf USB-Stick exportieren</button>
+  <!-- Tab 7: Admin -->
+  <div class="tab-content" id="tab-admin">
+    <div class="card admin-card">
+      <h2>Admin Panel</h2>
+      <div class="admin-grid">
+        <div class="admin-box">
+          <h3>WLAN Setup</h3>
+          <label>Modus</label>
+          <select id="admin-wifi-mode">
+            <option value="ap">Access Point</option>
+            <option value="station">Mit WLAN verbinden</option>
+          </select>
+          <label>SSID</label>
+          <input type="text" id="admin-wifi-ssid">
+          <label>Passwort</label>
+          <input type="password" id="admin-wifi-pass">
+          <button class="btn-primary" onclick="saveNetwork()">Speichern &amp; Reboot</button>
         </div>
-
-        <div class="card">
-          <h2 data-i18n="resetTitle">Station Zurücksetzen (System Reset)</h2>
-          <p data-i18n="resetDesc">Setzt den Arbeitsbereich für das nächste Studierenden-Team zurück (Löscht Datensätze, Gewichte und Auswertungsberichte).</p>
-          <button class="btn-danger" onclick="triggerResetWorkspace()" data-i18n="resetWorkspace">🗑️ Praktikum Zurücksetzen</button>
+        <div class="admin-box">
+          <h3>System</h3>
+          <button class="btn-secondary" onclick="systemUpdate()">🔄 System Update (Git Pull)</button>
+          <a class="btn-secondary" id="btn-jupyter-link" target="_blank" style="display:block; text-align:center; text-decoration:none; margin-top:10px;">🚀 JupyterLab (Pro)</a>
+          <button class="btn-danger" style="margin-top:10px;" onclick="resetWorkspace()">🗑️ Workspace Reset</button>
         </div>
       </div>
     </div>
+  </div>
 
-  </main>
-
-  <!-- Footer -->
   <footer>
-    &copy; 2026 Hochschule Furtwangen (HFU) | Fakultät Medical and Life Sciences / Maschinenbau &amp; WIng | Powered by Ultralytics YOLOv11 &amp; NVIDIA Jetson
+    <p>&copy; 2026 Hochschule Furtwangen (HFU) | AI-LAB Workstation | Built with FastAPI &amp; Ultralytics YOLOv11</p>
   </footer>
+
+  <!-- Admin Login Modal -->
+  <div id="admin-modal" class="modal">
+    <div class="modal-content">
+      <h3>Admin Zugang</h3>
+      <input type="password" id="admin-pin" placeholder="PIN eingeben">
+      <button class="btn-primary" onclick="verifyAdmin()">Login</button>
+      <button class="btn-secondary" onclick="document.getElementById('admin-modal').style.display='none'">Abbrechen</button>
+    </div>
+  </div>
+
+  <!-- Lightbox Modal -->
+  <div id="lightbox-modal" class="modal lightbox">
+    <span class="close" onclick="document.getElementById('lightbox-modal').style.display='none'">&times;</span>
+    <img class="lightbox-content" id="lightbox-img">
+    <div class="lightbox-caption">
+      <button class="btn-danger" id="btn-delete-img" onclick="deleteCurrentImage()">🗑️ Löschen</button>
+    </div>
+  </div>
 
   <script src="js/app.js"></script>
 </body>
