@@ -21,7 +21,7 @@ app.add_middleware(
 CAM_ID = int(os.getenv("CAMERA_INDEX", "0"))
 WORKSPACE_DIR = os.getenv("WORKSPACE_DIR", "/workspace/student_data")
 
-# Persistent Camera Manager
+# Persistent Camera Manager with Auto-Exposure Warmup & Black Frame Rejection
 class CameraManager:
     def __init__(self):
         self.cap = None
@@ -39,31 +39,37 @@ class CameraManager:
                 if cap.isOpened():
                     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
                     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-                    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
-                    ret, frame = cap.read()
-                    if ret and frame is not None:
+                    
+                    # Warmup: Read 5 initial frames to allow camera auto-exposure to stabilize
+                    frame = None
+                    for _ in range(5):
+                        ret, frame = cap.read()
+                        time.sleep(0.02)
+                    
+                    if frame is not None and np.mean(frame) > 2.0:
                         self.cap = cap
                         self.active_index = idx
                         self.is_real = True
-                        print(f"[CAMERA] Successfully opened USB webcam on {device_path}")
+                        print(f"[CAMERA] Successfully opened USB webcam on {device_path} (Brightness: {np.mean(frame):.1f})")
                         return True
+                    
                     cap.release()
         
         self.is_real = False
         return False
 
     def get_frame(self):
-        """Gets a frame from the active USB camera or returns Siemens Star fallback."""
+        """Gets a frame from active USB camera (rejects black frames) or returns Siemens Star fallback."""
         if self.cap is not None and self.cap.isOpened():
             ret, frame = self.cap.read()
-            if ret and frame is not None:
+            if ret and frame is not None and np.mean(frame) > 2.0:
                 self.last_frame = frame
                 return frame, True
 
-        # Try to reconnect camera
+        # Try to reconnect / scan camera
         if self.find_and_open_camera():
             ret, frame = self.cap.read()
-            if ret and frame is not None:
+            if ret and frame is not None and np.mean(frame) > 2.0:
                 self.last_frame = frame
                 return frame, True
 
