@@ -12,7 +12,10 @@ RUN apt-get update && apt-get install -y \
     zip \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel "packaging>=24.0"
+
 RUN pip3 install --no-cache-dir \
+    "pyzmq<26.0.0" \
     "jupyterlab>=3.6.0,<4.0.0" \
     "ultralytics==8.1.34" \
     "opencv-python-headless==4.9.0.80" \
