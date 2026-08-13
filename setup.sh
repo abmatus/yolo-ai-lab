@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # HFU AI-LAB: Auto-Installer & Systemd Setup Script for Jetson Orin Nano
-# Usage: sudo ./setup.sh
+# Usage: sudo bash setup.sh
 # ==============================================================================
 
 if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root (sudo ./setup.sh)"
+  echo "Please run as root (sudo bash setup.sh)"
   exit 1
 fi
+
+REAL_USER="${SUDO_USER:-nvidia}"
 
 echo "======================================================================"
 echo "      HFU AI-LAB: NVIDIA Jetson Orin Nano Auto-Installer Setup"
@@ -16,7 +18,7 @@ echo "======================================================================"
 # 1. Install Docker & Prerequisites if missing
 echo "[SETUP] Updating package lists and installing prerequisites..."
 apt-get update
-apt-get install -y git v4l-utils hostapd dnsmasq curl jq docker.io docker-compose-v2 nvidia-container-toolkit || true
+apt-get install -y git v4l-utils hostapd dnsmasq curl jq docker.io docker-compose-v2 nvidia-container-toolkit chromium-browser || true
 
 # 2. Configure NVIDIA Container Toolkit Runtime
 echo "[SETUP] Configuring NVIDIA Container Toolkit & Docker daemon..."
@@ -56,12 +58,42 @@ EOF
 fi
 
 # 4. Add current user to docker group
-if [ -n "$SUDO_USER" ]; then
-    usermod -aG docker "$SUDO_USER"
-    echo "[SETUP] User $SUDO_USER added to docker group."
+usermod -aG docker "$REAL_USER"
+echo "[SETUP] User $REAL_USER added to docker group."
+
+# 5. Enable Ubuntu Desktop Auto-Login for $REAL_USER
+echo "[SETUP] Enabling Desktop Auto-Login for user $REAL_USER..."
+if [ -f /etc/gdm3/custom.conf ]; then
+    sed -i 's/^#  AutomaticLoginEnable = .*/AutomaticLoginEnable = true/' /etc/gdm3/custom.conf
+    sed -i "s/^#  AutomaticLogin = .*/AutomaticLogin = $REAL_USER/" /etc/gdm3/custom.conf
 fi
 
-# 5. Create Systemd Autostart & Auto-Update Service
+if [ -d /etc/lightdm ]; then
+    mkdir -p /etc/lightdm/lightdm.conf.d
+    cat <<EOF > /etc/lightdm/lightdm.conf.d/50-autologin.conf
+[Seat:*]
+autologin-user=$REAL_USER
+autologin-user-timeout=0
+EOF
+fi
+
+# 6. Configure Chromium Fullscreen Kiosk Autostart on Desktop
+USER_HOME=$(eval echo "~$REAL_USER")
+AUTOSTART_DIR="$USER_HOME/.config/autostart"
+mkdir -p "$AUTOSTART_DIR"
+
+cat <<EOF > "$AUTOSTART_DIR/hfu-kiosk.desktop"
+[Desktop Entry]
+Type=Application
+Name=HFU AI Workstation Kiosk
+Exec=chromium-browser --kiosk --noerrdialogs --disable-infobars --check-for-update-interval=31536000 http://localhost
+X-GNOME-Autostart-enabled=true
+EOF
+
+chown -R "$REAL_USER:$REAL_USER" "$USER_HOME/.config"
+echo "[SUCCESS] Kiosk Autostart configured for Desktop."
+
+# 7. Create Systemd Autostart & Auto-Update Service
 SERVICE_FILE="/etc/systemd/system/hfu-ai-lab.service"
 WORKING_DIR="$(pwd)"
 
@@ -89,10 +121,10 @@ systemctl enable hfu-ai-lab.service
 
 echo "[SUCCESS] Autostart & Auto-Update Service enabled!"
 
-# 6. Make scripts executable
+# 8. Make scripts executable
 chmod +x scripts/*.sh
 
-# 7. Run initial startup & container build
+# 9. Run initial startup & container build
 bash scripts/update.sh
 
 echo "======================================================================"

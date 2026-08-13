@@ -1,6 +1,7 @@
 import os
 import time
 import subprocess
+import threading
 import cv2
 import numpy as np
 import psutil
@@ -20,62 +21,6 @@ app.add_middleware(
 
 CAM_ID = int(os.getenv("CAMERA_INDEX", "0"))
 WORKSPACE_DIR = os.getenv("WORKSPACE_DIR", "/workspace/student_data")
-
-# Persistent Camera Manager with Auto-Exposure Warmup & Black Frame Rejection
-class CameraManager:
-    def __init__(self):
-        self.cap = None
-        self.active_index = -1
-        self.last_frame = None
-        self.is_real = False
-
-    def find_and_open_camera(self):
-        """Scans video indices 0, 1, 2, 3 to find any working USB webcam."""
-        indices_to_try = [CAM_ID] + [i for i in range(4) if i != CAM_ID]
-        for idx in indices_to_try:
-            device_path = f"/dev/video{idx}"
-            if os.path.exists(device_path):
-                cap = cv2.VideoCapture(idx, cv2.CAP_V4L2)
-                if cap.isOpened():
-                    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-                    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-                    
-                    # Warmup: Read 5 initial frames to allow camera auto-exposure to stabilize
-                    frame = None
-                    for _ in range(5):
-                        ret, frame = cap.read()
-                        time.sleep(0.02)
-                    
-                    if frame is not None and np.mean(frame) > 2.0:
-                        self.cap = cap
-                        self.active_index = idx
-                        self.is_real = True
-                        print(f"[CAMERA] Successfully opened USB webcam on {device_path} (Brightness: {np.mean(frame):.1f})")
-                        return True
-                    
-                    cap.release()
-        
-        self.is_real = False
-        return False
-
-    def get_frame(self):
-        """Gets a frame from active USB camera (rejects black frames) or returns Siemens Star fallback."""
-        if self.cap is not None and self.cap.isOpened():
-            ret, frame = self.cap.read()
-            if ret and frame is not None and np.mean(frame) > 2.0:
-                self.last_frame = frame
-                return frame, True
-
-        # Try to reconnect / scan camera
-        if self.find_and_open_camera():
-            ret, frame = self.cap.read()
-            if ret and frame is not None and np.mean(frame) > 2.0:
-                self.last_frame = frame
-                return frame, True
-
-        return generate_siemens_star_fallback(), False
-
-camera_mgr = CameraManager()
 
 
 def generate_siemens_star_fallback():
@@ -99,10 +44,85 @@ def generate_siemens_star_fallback():
     return img
 
 
+# Single-Threaded Background Camera Reader (Exclusively locks V4L2 once)
+class CameraManager:
+    def __init__(self):
+        self.cap = None
+        self.active_index = -1
+        self.is_real = False
+        self.current_frame = generate_siemens_star_fallback()
+        self.lock = threading.Lock()
+        self.running = True
+        self.thread = threading.Thread(target=self._update_loop, daemon=True)
+        self.thread.start()
+
+    def _try_open_camera(self):
+        indices_to_try = [CAM_ID] + [i for i in range(4) if i != CAM_ID]
+        for idx in indices_to_try:
+            device_path = f"/dev/video{idx}"
+            if os.path.exists(device_path):
+                cap = cv2.VideoCapture(idx, cv2.CAP_V4L2)
+                if cap.isOpened():
+                    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+                    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+                    
+                    # Read 5 warmup frames to let auto-exposure adjust
+                    frame = None
+                    for _ in range(5):
+                        ret, frame = cap.read()
+                        time.sleep(0.02)
+                    
+                    if frame is not None and np.mean(frame) > 2.0:
+                        self.cap = cap
+                        self.active_index = idx
+                        self.is_real = True
+                        print(f"[CAMERA] Exclusively locked USB webcam on {device_path} (Mean Brightness: {np.mean(frame):.1f})")
+                        return True
+                    cap.release()
+
+        self.is_real = False
+        self.cap = None
+        return False
+
+    def _update_loop(self):
+        """Dedicated background thread reading V4L2 device continuously."""
+        while self.running:
+            if self.cap is None or not self.cap.isOpened():
+                if not self._try_open_camera():
+                    with self.lock:
+                        self.current_frame = generate_siemens_star_fallback()
+                        self.is_real = False
+                    time.sleep(1.0)
+                    continue
+
+            ret, frame = self.cap.read()
+            if ret and frame is not None and np.mean(frame) > 2.0:
+                with self.lock:
+                    self.current_frame = frame
+                    self.is_real = True
+            else:
+                # Frame bad or black, release and fallback
+                if self.cap:
+                    self.cap.release()
+                    self.cap = None
+                with self.lock:
+                    self.current_frame = generate_siemens_star_fallback()
+                    self.is_real = False
+                time.sleep(0.5)
+
+            time.sleep(0.03) # ~30 FPS
+
+    def get_latest_frame(self):
+        with self.lock:
+            return self.current_frame.copy(), self.is_real
+
+camera_mgr = CameraManager()
+
+
 def mjpeg_stream_generator():
-    """MJPEG stream generator for live camera view."""
+    """MJPEG stream generator serving multiple client tabs smoothly."""
     while True:
-        frame, is_real_cam = camera_mgr.get_frame()
+        frame, is_real_cam = camera_mgr.get_latest_frame()
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
         status_text = f"CAM: ONLINE (/dev/video{camera_mgr.active_index})" if is_real_cam else "CAM: SIMULATED (DEMO)"
         color = (0, 200, 0) if is_real_cam else (0, 165, 255)
@@ -128,7 +148,7 @@ def video_feed():
 @app.get("/api/status")
 def system_status():
     """Comprehensive Hardware & Environment Status Endpoint."""
-    frame, cam_online = camera_mgr.get_frame()
+    cam_online = camera_mgr.is_real
 
     # Get RAM & CPU
     mem = psutil.virtual_memory()

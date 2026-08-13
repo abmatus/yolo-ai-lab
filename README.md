@@ -59,13 +59,15 @@ Führe auf einem neu aufgesetzten NVIDIA Jetson Orin Nano einfach folgenden Befe
 ```bash
 git clone https://github.com/DEIN_USERNAME/hfu-ai-lab.git
 cd hfu-ai-lab
-sudo ./setup.sh
+sudo bash setup.sh
 ```
 
 **Was `setup.sh` automatisch erledigt:**
-1. Installiert Docker, Docker-Compose, Kamera-Treiber und Netzwerk-Tools.
-2. Richtet den Linux-Systemdienst `hfu-ai-lab.service` ein (**Autostart beim Booten**).
-3. Baut und startet alle Docker-Container.
+1. Installiert Docker, Docker-Compose, Kamera-Treiber und Chromium.
+2. Aktiviert **Ubuntu Desktop Auto-Login** für den Benutzer (`nvidia`).
+3. Richtet **Chromium Vollbild-Kiosk Autostart** beim Systemstart ein (`http://localhost`).
+4. Richtet den Linux-Systemdienst `hfu-ai-lab.service` ein (**Autostart & Auto-Update beim Booten**).
+5. Baut und startet alle Docker-Container.
 
 ### 2. Stand-SSID anpassen (Multi-Stand-Betrieb)
 Falls mehrere Stände in einem Raum betrieben werden, passe die Hotspot-SSID an (z. B. Stand `02` -> `AI-LAB-ORIN-02`):
