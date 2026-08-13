@@ -90,22 +90,28 @@ class StreamEngine:
             print(f"[CAM] ❌ Cannot open /dev/video{CAM_INDEX}")
             return None
 
+        # Set resolution and FPS — do NOT force FOURCC/MJPG here.
+        # Forcing MJPG can silently fail on some UVC cameras (UGREEN included)
+        # and causes the driver to return empty/black frames.
+        # Let V4L2 negotiate the best native format (YUYV or MJPG).
         cap.set(cv2.CAP_PROP_FRAME_WIDTH,  640)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
-        cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
         cap.set(cv2.CAP_PROP_FPS, TARGET_FPS)
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
 
-        # Drain stale buffer frames — UVC cameras queue old frames on open
-        for _ in range(8):
+        # Drain stale buffer — UVC cameras queue old/empty frames on open.
+        # 20 grabs gives the auto-exposure time to stabilize.
+        print(f"[CAM] Draining buffer on /dev/video{CAM_INDEX} …")
+        for _ in range(20):
             cap.grab()
 
         ret, frame = cap.read()
         if ret and frame is not None and frame.size > 0:
-            print(f"[CAM] ✅ /dev/video{CAM_INDEX} ready — LED ON")
+            mean = float(__import__('numpy').mean(frame))
+            print(f"[CAM] ✅ /dev/video{CAM_INDEX} ready — LED ON — mean brightness: {mean:.1f}")
             return cap
 
-        print(f"[CAM] ❌ /dev/video{CAM_INDEX} opened but returned no frame")
+        print(f"[CAM] ❌ /dev/video{CAM_INDEX} opened but returned no frame (ret={ret})")
         cap.release()
         return None
 
