@@ -18,17 +18,19 @@ services:
     container_name: hfu_ai_backend
     restart: always
     privileged: true
+    user: root
     ports:
       - "8000:8000"
+    devices:
+      - /dev/video0:/dev/video0   # UGREEN USB webcam (UVC Capture node)
     volumes:
       - ./data:/workspace/data
       - ./student_data:/workspace/student_data
       - ./scripts:/app/scripts
       - /var/run/docker.sock:/var/run/docker.sock
       - /media:/media
-      - /dev:/dev
     environment:
-      - CAMERA_INDEX=0  # UGREEN USB webcam on /dev/video0
+      - CAMERA_INDEX=0
       - WORKSPACE_DIR=/workspace/student_data
     networks:
       - ai_lab_net
