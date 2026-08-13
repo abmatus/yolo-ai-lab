@@ -44,91 +44,84 @@ def generate_siemens_star_fallback():
     return img
 
 
-def grab_frame_subprocess(idx):
-    """Isolated 1.5s subprocess trying MJPG, YUYV & default formats on camera index."""
-    script = f"""
-import cv2, numpy as np, sys
-
-def try_cap(backend, fourcc=None):
-    try:
-        cap = cv2.VideoCapture({idx}, backend) if backend is not None else cv2.VideoCapture({idx})
-        if cap.isOpened():
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-            if fourcc:
-                cap.set(cv2.CAP_PROP_FOURCC, fourcc)
-            
-            # Read up to 3 frames for camera warmup
-            frame = None
-            for _ in range(3):
-                ret, f = cap.read()
-                if ret and f is not None and f.size > 0:
-                    frame = f
-            cap.release()
-            
-            if frame is not None and np.mean(frame) > 0.5:
-                ret_bytes, jpg = cv2.imencode('.jpg', frame)
-                if ret_bytes:
-                    sys.stdout.buffer.write(jpg.tobytes())
-                    sys.exit(0)
-    except Exception:
-        pass
-
-# 1. Try V4L2 + MJPG
-try_cap(cv2.CAP_V4L2, cv2.VideoWriter_fourcc(*'MJPG'))
-# 2. Try V4L2 default format
-try_cap(cv2.CAP_V4L2, None)
-# 3. Try default OpenCV backend
-try_cap(None, None)
-
-sys.exit(1)
-"""
-    try:
-        res = subprocess.run(["python3", "-c", script], timeout=1.5, capture_output=True)
-        if res.returncode == 0 and len(res.stdout) > 500:
-            frame = cv2.imdecode(np.frombuffer(res.stdout, dtype=np.uint8), cv2.IMREAD_COLOR)
-            if frame is not None:
-                return frame, True
-    except subprocess.TimeoutExpired:
-        pass
-    return None, False
-
-
-# Non-Blocking Background Stream Engine
+# Persistent Continuous Stream Engine (Keeps Webcam Hardware Active & LED Solid ON)
 class StreamEngine:
     def __init__(self):
-        self.current_frame = generate_siemens_star_fallback()
-        self.is_real = False
+        self.cap = None
         self.active_index = -1
+        self.is_real = False
+        self.current_frame = generate_siemens_star_fallback()
         self.lock = threading.Lock()
         self.running = True
-        self.thread = threading.Thread(target=self._loop, daemon=True)
+        self.thread = threading.Thread(target=self._update_loop, daemon=True)
         self.thread.start()
 
-    def _loop(self):
-        while self.running:
-            found = False
-            # Check indices 0, 1, 2, 3
-            indices_to_try = [CAM_ID] + [i for i in range(4) if i != CAM_ID]
-            for idx in indices_to_try:
-                if os.path.exists(f"/dev/video{idx}"):
-                    frame, is_real = grab_frame_subprocess(idx)
-                    if is_real and frame is not None:
-                        with self.lock:
-                            self.current_frame = frame
-                            self.is_real = True
-                            self.active_index = idx
-                        found = True
-                        break
+    def _open_persistent_webcam(self):
+        """Scans camera indices 0-3 and keeps VideoCapture OPEN continuously."""
+        indices_to_try = [CAM_ID] + [i for i in range(4) if i != CAM_ID]
+        for idx in indices_to_try:
+            device_path = f"/dev/video{idx}"
+            if os.path.exists(device_path):
+                # Try opening camera with V4L2 and MJPG/YUYV format
+                cap = cv2.VideoCapture(idx, cv2.CAP_V4L2)
+                if cap.isOpened():
+                    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+                    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+                    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
+                    
+                    # Read 5 warmup frames to lock auto-exposure and test feed
+                    valid = False
+                    for _ in range(5):
+                        ret, frame = cap.read()
+                        if ret and frame is not None and frame.size > 0:
+                            valid = True
+                        time.sleep(0.03)
 
-            if not found:
+                    if valid:
+                        self.cap = cap
+                        self.active_index = idx
+                        self.is_real = True
+                        print(f"[CAMERA] Persistent stream locked on {device_path} (Webcam LED Solid ON)")
+                        return True
+                    cap.release()
+
+        self.is_real = False
+        self.cap = None
+        return False
+
+    def _update_loop(self):
+        """Continuous stream loop without closing/re-opening the webcam."""
+        consecutive_failures = 0
+        while self.running:
+            if self.cap is None or not self.cap.isOpened():
+                if not self._open_persistent_webcam():
+                    with self.lock:
+                        self.current_frame = generate_siemens_star_fallback()
+                        self.is_real = False
+                        self.active_index = -1
+                    time.sleep(1.0)
+                    continue
+
+            # Read frame continuously from persistent open camera
+            ret, frame = self.cap.read()
+            if ret and frame is not None and frame.size > 0:
+                consecutive_failures = 0
                 with self.lock:
-                    self.current_frame = generate_siemens_star_fallback()
-                    self.is_real = False
-                    self.active_index = -1
-                time.sleep(1.0)
+                    self.current_frame = frame
+                    self.is_real = True
             else:
-                time.sleep(0.04) # ~25 FPS
+                consecutive_failures += 1
+                if consecutive_failures > 10: # Reconnect if camera unplugged
+                    print("[CAMERA] Stream lost. Reconnecting...")
+                    if self.cap:
+                        self.cap.release()
+                        self.cap = None
+                    with self.lock:
+                        self.current_frame = generate_siemens_star_fallback()
+                        self.is_real = False
+                    time.sleep(0.5)
+
+            time.sleep(0.03) # ~30 FPS
 
     def get_frame(self):
         with self.lock:
