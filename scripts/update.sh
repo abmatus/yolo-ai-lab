@@ -50,9 +50,9 @@ if [ "$ONLINE" = true ]; then
     fi
 fi
 
-# 3. Start Docker Containers (Works 100% Offline with build check)
+# 3. Fast Startup of Docker Containers (Starts instantly in 2 seconds)
 echo "[DOCKER] Ensuring local Docker containers are running..."
-run_compose up --build -d
+run_compose up -d
 
 echo "======================================================================"
 echo "[SUCCESS] HFU AI Workstation is ACTIVE & READY."

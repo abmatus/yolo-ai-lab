@@ -83,7 +83,7 @@ autologin-user-timeout=0
 EOF
 fi
 
-# 6. Disable Screen Blanking, DPMS & Sleep (Keep Monitor ON 24/7)
+# 6. Configure Smart Kiosk Autostart (Waits for Webserver Ready before launching Browser)
 echo "[SETUP] Disabling screen blanking & DPMS sleep mode..."
 systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target 2>/dev/null || true
 
@@ -95,12 +95,12 @@ cat <<EOF > "$AUTOSTART_DIR/hfu-kiosk.desktop"
 [Desktop Entry]
 Type=Application
 Name=HFU AI Workstation Kiosk & Display KeepAlive
-Exec=bash -c "xset s off -dpms s noblank 2>/dev/null; gsettings set org.gnome.desktop.session idle-delay 0 2>/dev/null; gsettings set org.gnome.desktop.screensaver lock-enabled false 2>/dev/null; chromium-browser --kiosk --noerrdialogs --disable-infobars --check-for-update-interval=31536000 http://localhost"
+Exec=bash -c "xset s off -dpms s noblank 2>/dev/null; gsettings set org.gnome.desktop.session idle-delay 0 2>/dev/null; gsettings set org.gnome.desktop.screensaver lock-enabled false 2>/dev/null; until curl -s -I http://localhost >/dev/null; do sleep 1; done; chromium-browser --kiosk --noerrdialogs --disable-infobars --check-for-update-interval=31536000 http://localhost"
 X-GNOME-Autostart-enabled=true
 EOF
 
 chown -R "$REAL_USER:$REAL_USER" "$USER_HOME/.config"
-echo "[SUCCESS] Kiosk & Display KeepAlive configured for Desktop."
+echo "[SUCCESS] Smart Kiosk & Display KeepAlive configured for Desktop."
 
 # 7. Create Systemd Autostart & Auto-Update Service
 SERVICE_FILE="/etc/systemd/system/hfu-ai-lab.service"
