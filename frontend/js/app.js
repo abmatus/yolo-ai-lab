@@ -419,7 +419,8 @@ async function fetchGallery() {
   grid.innerHTML = data.images.map((img, idx) => `
     <div class="gallery-item" onclick="openLightbox(${idx})">
       <img src="/api/images/${img.id}" loading="lazy">
-      ${img.annotated ? '<span class="badge-success">Labeled</span>' : ''}
+      ${img.annotated ? '<span class="badge-success" style="position:absolute; bottom:5px; left:5px; background:rgba(34,197,94,0.9); padding:2px 6px; border-radius:4px; font-size:12px;">Labeled</span>' : ''}
+      <button class="btn-del-gallery" onclick="event.stopPropagation(); deleteSpecificImage('${img.id}')">❌</button>
     </div>
   `).join("");
 }
@@ -443,6 +444,35 @@ async function deleteCurrentImage() {
   document.getElementById("lightbox-modal").style.display = "none";
   fetchGallery();
   fetchGalleryForLabeling();
+}
+
+async function deleteSpecificImage(id) {
+  await fetch(`/api/images/${id}`, {method:"DELETE"});
+  fetchGallery();
+  fetchGalleryForLabeling();
+}
+
+function showInfo(tabId) {
+  const titles = {
+    kiosk: "Info: Hardware & Fokus",
+    coco: "Info: COCO Exploration",
+    capture: "Info: Bilderfassung",
+    labeling: "Info: Labeling",
+    training: "Info: KI Training",
+    eval: "Info: Evaluation"
+  };
+  const texts = {
+    kiosk: "<p>Hier richten wir die Kamera optimal ein. Der <strong>Siemensstern</strong> wird verwendet, um den Fokus manuell über den Objektiv-Ring einzustellen. Die <em>Laplace-Varianz</em> berechnet den Kantenkontrast – je höher der Wert, desto schärfer das Bild. Ein Wert > 85 gilt als scharf.</p>",
+    coco: "<p>Dies ist ein Sandkasten-Modus, um die Fähigkeiten eines vortrainierten YOLO-Modells zu testen. <strong>YOLO (You Only Look Once)</strong> erkennt Objekte in Echtzeit (Live-Inferenz). Verstelle die <em>Confidence</em> (Schwellenwert), um zu sehen, ab wann die KI unsicher wird. Das Modell kennt 80 Standard-Klassen aus dem COCO-Datensatz (z.B. Person, Auto, Tasse).</p>",
+    capture: "<p>Wir beginnen nun mit dem Aufbau eines eigenen Datensatzes. Positioniere das gewünschte Bauteil in verschiedenen Winkeln und Lichtverhältnissen und nimm Bilder auf. Für ein robustes Modell werden mind. 30-50 Bilder empfohlen.</p>",
+    labeling: "<p>Jedes Bild muss annotiert (gelabelt) werden. Die KI muss lernen, wie das Bauteil aussieht (Features) und wo es sich befindet (Bounding Box).<br><br><strong>Assisted Labeling:</strong> Nutzt das Basis-Modell, um bereits bekannte Objekte vorzuschlagen, was dir viel Handarbeit spart. Füge oben rechts eigene Klassen (z.B. 'Zahnrad') hinzu und rahme sie auf dem Canvas ein.</p>",
+    training: "<p>Wir nutzen <strong>Transfer Learning</strong>. Das neuronale Netz hat durch das Pre-Training auf Millionen von Bildern bereits gelernt, Kanten und Formen zu erkennen. Wir trainieren nun nur die letzte Schicht (Klassifikation) auf deine neuen Bauteile um. Dies ist effizient und läuft direkt auf der NVIDIA GPU des Jetsons (CUDA).<br><br>Die <em>Loss</em>-Kurve sollte im Laufe der Epochen sinken.</p>",
+    eval: "<p>Nach dem Training wird das Modell gegen die Test-Bilder geprüft, die nicht beim Training verwendet wurden. Die wichtigsten Metriken sind <strong>Precision</strong> (Genauigkeit: Wie viele gefundene Objekte sind wirklich korrekt?) und <strong>Recall</strong> (Trefferquote: Wie viele der tatsächlich vorhandenen Objekte wurden gefunden?).<br>Der <strong>mAP</strong> (mean Average Precision) fasst die Leistung über alle Klassen zusammen.</p>"
+  };
+  
+  document.getElementById("info-modal-title").innerHTML = titles[tabId] || "Info";
+  document.getElementById("info-modal-body").innerHTML = texts[tabId] || "Keine Information verfügbar.";
+  document.getElementById("info-modal").style.display = "flex";
 }
 
 // Lightbox keyboard navigation
@@ -648,10 +678,10 @@ function openBatchAssistedModal() {
 
 async function startBatchLabeling() {
   const model = document.getElementById("batch-model-select").value;
-  // Make sure infer engine is on this model (Backend endpoint uses infer_engine model)
+  // Set lower confidence for assisted labeling to catch more objects
   await fetch("/api/infer-config", {
     method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({model: model})
+    body: JSON.stringify({model: model, confidence: 0.25})
   });
   
   document.getElementById("batch-label-modal").style.display = "none";

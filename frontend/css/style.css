@@ -41,13 +41,14 @@
 }
 
 body {
-  font-family: var(--font-main);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   transition: background-color 0.3s ease, color 0.3s ease;
+  line-height: 1.6;
 }
 
 /* Header */
@@ -196,6 +197,15 @@ main.container {
   gap: 24px;
 }
 
+.class-list {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  height: 200px; /* fixed height */
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
 .card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -252,15 +262,19 @@ main.container {
   background-color: var(--hfu-green-light);
 }
 
-.btn-danger {
-  background-color: #ef4444;
-  color: white;
+.btn-danger { background-color: #ef4444; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: var(--radius); font-weight: 500; }
+.btn-danger:hover { background-color: #dc2626; }
+
+.btn-info {
+  background: transparent;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 600;
+  font-size: 24px;
   cursor: pointer;
+  margin-left: 10px;
+  vertical-align: middle;
+  padding: 0;
 }
+.btn-info:hover { transform: scale(1.1); }
 
 /* Video Frame Container */
 .video-frame-container {
@@ -611,10 +625,11 @@ footer {
 }
 .gallery-item {
   position: relative;
-  cursor: pointer;
-  border-radius: 6px;
+  border-radius: var(--radius);
   overflow: hidden;
-  border: 2px solid transparent;
+  cursor: pointer;
+  aspect-ratio: 1;
+  background-color: #000;
 }
 .gallery-item:hover { border-color: var(--hfu-green); }
 .gallery-item img { width: 100%; display: block; }
@@ -642,31 +657,23 @@ footer {
   flex-direction: column;
   overflow-y: auto;
 }
-.labeling-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  padding: 15px;
-}
+.labeling-main { flex: 1; display: flex; flex-direction: column; gap: 15px; }
 .canvas-container {
+  background-color: #000;
+  border-radius: var(--radius);
   position: relative;
-  width: 100%;
-  height: 100%;
-  background: #000;
-  border-radius: 8px;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex: 1;
+  min-height: 400px;
 }
-canvas {
-  cursor: crosshair;
+#annotator-canvas {
   max-width: 100%;
   max-height: 100%;
+  object-fit: contain;
+  cursor: crosshair;
 }
 .annotator-controls {
   display: flex;
@@ -801,7 +808,7 @@ canvas {
 /* Max Width Container */
 .main-container {
   max-width: 1400px;
-  margin: 0 auto;
+  margin: 20px auto 0;
   width: 100%;
 }
 
@@ -886,4 +893,24 @@ canvas {
   cursor: pointer;
   font-size: 14px;
 }
+
+/* Gallery Delete Button */
+.btn-del-gallery {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(220, 38, 38, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.btn-del-gallery:hover { background: rgba(255, 0, 0, 1); transform: scale(1.1); }
+
 
