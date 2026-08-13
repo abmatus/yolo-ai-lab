@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HFU AI Workstation | Starting...</title>
+  <style>
+    :root {
+      --primary: #008a52;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .splash-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 48px;
+      width: 90%;
+      max-width: 520px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .logo-container {
+      margin-bottom: 24px;
+    }
+    .spinner-ring {
+      display: inline-block;
+      width: 64px;
+      height: 64px;
+      border: 5px solid rgba(0, 138, 82, 0.2);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 24px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .progress-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 138, 82, 0.15);
+      color: #22c55e;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .dot-pulse {
+      width: 8px;
+      height: 8px;
+      background-color: #22c55e;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="splash-card">
+    <div class="spinner-ring"></div>
+    <h1>HFU KI-Workstation wird gestartet...</h1>
+    <p>Bitte einen Moment Geduld. Docker-Container, PyTorch GPU &amp; Kamera-Stream werden im Hintergrund initialisiert.<br><br><em>System is starting up. Preparing GPU &amp; camera stream...</em></p>
+
+    <div class="progress-badge">
+      <span class="dot-pulse"></span>
+      <span id="status-label">Starte Dienste... / Starting services...</span>
+    </div>
+  </div>
+
+  <script>
+    async function checkReadiness() {
+      try {
+        const res = await fetch('/api/status');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'online') {
+            document.getElementById('status-label').textContent = 'Bereit! Lade Dashboard...';
+            setTimeout(() => {
+              window.location.href = '/index.html';
+            }, 500);
+          }
+        }
+      } catch (e) {
+        // Still booting, retry silently
+      }
+    }
+    setInterval(checkReadiness, 1000);
+    checkReadiness();
+  </script>
+</body>
+</html>
