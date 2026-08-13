@@ -784,10 +784,7 @@ async function saveNetwork() {
   alert("Gespeichert. Bitte Gerät neustarten, damit die Änderungen wirksam werden.");
 }
 async function systemUpdate() {
-  alert("Update wird ausgeführt...");
-  const res = await fetch("/api/admin/update", {method:"POST"});
-  const d = await res.json();
-  alert(d.output || d.error);
+  alert("System-Update (Git Pull) kann aus dem Docker-Container heraus fehlschlagen.\n\nBitte öffne ein Terminal auf dem Jetson und führe aus:\n\ncd ~/yolo-ai-lab && git pull && sudo docker-compose up -d --build");
 }
 async function resetWorkspace() {
   if(confirm("Alle Praktikumsdaten wirklich löschen?")) {
