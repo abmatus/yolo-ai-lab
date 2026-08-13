@@ -659,7 +659,7 @@ footer {
 }
 .labeling-main { flex: 1; display: flex; flex-direction: column; gap: 15px; }
 .canvas-container {
-  background-color: #000;
+  background-color: transparent;
   border-radius: var(--radius);
   position: relative;
   overflow: hidden;
@@ -705,7 +705,8 @@ footer {
   gap: 5px;
   margin-top: 10px;
 }
-.add-class input { flex: 1; }
+.add-class input { flex: 1; min-width: 0; }
+.add-class button { flex-shrink: 0; width: 44px; }
 
 /* Admin */
 .admin-grid {
