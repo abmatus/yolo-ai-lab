@@ -793,3 +793,97 @@ canvas {
   font-weight: bold;
   cursor: pointer;
 }
+
+/* ==============================================================================
+   UI Refinements (Iterative Feedback)
+   ============================================================================== */
+
+/* Max Width Container */
+.main-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Video Stream black border removal */
+.video-stream {
+  object-fit: cover;
+  aspect-ratio: 16/9;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.video-frame-container {
+  overflow: hidden; /* Hide anything outside cover */
+}
+
+/* Touch Friendly Inputs */
+.large-input {
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+}
+.btn-large {
+  padding: 14px 20px;
+  font-size: 16px;
+}
+
+/* Dashboard Tiles Enhancement */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+.step-card {
+  padding: 30px 20px;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.step-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+.step-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+/* Tab Navigation Buttons (Next/Prev) */
+.tab-nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Lightbox Navigation */
+.lightbox-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  font-size: 40px;
+  padding: 20px 15px;
+  cursor: pointer;
+  z-index: 1010;
+  border-radius: 8px;
+}
+.lightbox-arrow:hover { background: rgba(0,0,0,0.8); }
+.left-arrow { left: 20px; }
+.right-arrow { right: 20px; }
+
+/* Flex alignment for Class List Items */
+.class-item {
+  display: flex;
+  justify-content: space-between;
+}
+.class-item .btn-del-class {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+

@@ -121,10 +121,6 @@ class StreamEngine:
             ret, frame = self._cap.read()
             if ret and frame is not None and frame.size > 0:
                 failures = 0
-                ts = time.strftime("%H:%M:%S")
-                cv2.putText(frame, f"{CAM_PATH} | {ts}",
-                            (10, frame.shape[0] - 12),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 220, 0), 1)
                 _, buf = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
                 with self._lock:
                     self._jpeg = buf.tobytes()

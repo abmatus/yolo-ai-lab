@@ -14,35 +14,61 @@ const i18n = {
     welcomeText: "Diese autarke KI-Workstation ermöglicht das vollständige Training und die Evaluierung eines modernen YOLOv11 Neuronalen Netzes direkt auf der NVIDIA Jetson Orin Nano GPU.",
     stepsTitle: "Praktikumsablauf",
     step1: "1. Fokus",
-    step1Desc: "Siemensstern Schärfeeinstellung.",
+    dashStep1: "1. Kamera & Fokus",
+    dashStep1Desc: "Siemensstern fokussieren und Messwerte prüfen.",
     step2: "2. COCO Live",
-    step2Desc: "Vertrautheits-Test YOLOv11.",
+    dashStep2: "2. COCO Exploration",
+    dashStep2Desc: "Inferenz mit vortrainierten Modellen testen.",
     step3: "3. Aufnahme",
-    step3Desc: "Aufnahmen vom Bauteil.",
+    dashStep3: "3. Bilder aufnehmen",
+    dashStep3Desc: "Datensatz vom gewünschten Bauteil erstellen.",
     step4: "4. Labeling",
-    step4Desc: "KI-unterstützte Annotation.",
+    dashStep4: "4. Labeling",
+    dashStep4Desc: "Bilder annotieren und Klassen zuweisen.",
     step5: "5. Training",
-    step5Desc: "Transfer Learning auf Jetson.",
+    dashStep5: "5. KI Training",
+    dashStep5Desc: "Transfer-Learning des YOLO-Modells starten.",
     step6: "6. Evaluation",
-    step6Desc: "mAP & PDF-Protokoll.",
+    dashStep6: "6. Evaluation",
+    dashStep6Desc: "mAP Metriken berechnen & Protokoll erstellen.",
     focusTitle: "Live-Kamerabild & Fokus-Messung (Siemensstern)",
     focusDesc: "Stellen Sie den manuellen Fokusring ein, bis die Linien scharf sind.",
     focusMeasArea: "Messbereich",
-    focusScoreUnit: "/ 100",
-    focusAlgoRow: "Algorithmus",
-    focusAreaRow: "Messbereich",
     focusVarRow: "Laplace-Varianz",
-    focusAreaValue: "Zentrum 40%",
-    focusAlgoValue: "Laplacian σ²",
-    focusHintDefault: "🎯 Platzieren Sie den Siemensstern im Messbereich und drehen Sie am Fokusring.",
-    focusHintSharp: "✅ Optimaler Fokus erreicht!",
-    focusHintGood: "🔄 Sehr gut! Noch etwas am Fokusring drehen.",
-    focusHintOk: "🔄 Mittelmäßig. Score sollte steigen.",
-    focusHintBlurry: "⚠️ Unscharf. Fokusring drehen.",
     zoneBlurry: "Unscharf",
     zoneOk: "Mittel",
     zoneGood: "Gut",
-    zoneSharp: "Scharf"
+    zoneSharp: "Scharf",
+    btnPrev: "⬅ Zurück",
+    btnNext: "Weiter ➡",
+    cocoTitle: "Live YOLO Inferenz (COCO Exploration)",
+    cocoSelectModel: "Modell auswählen",
+    cocoUploadModel: "Eigenes Modell hochladen (.pt)",
+    cocoShowBoxes: "Bounding Boxes anzeigen",
+    cocoLiveStats: "Live Statistik",
+    captureTitle: "Bilderfassung",
+    captureBtn: "Bild aufnehmen",
+    captureGallery: "Galerie",
+    labelingTitle: "Assisted Labeling",
+    labelingImages: "Bilder",
+    labelingBatchBtn: "🤖 Batch Assisted Labeling",
+    labelingClasses: "Klassen",
+    labelingBoxes: "Boxes (Aktuelles Bild)",
+    trainingTitle: "KI Training",
+    trainServer: "Trainingsserver URL (leer für Jetson lokal)",
+    trainEpochs: "Epochen",
+    trainModel: "Start-Modell",
+    trainStart: "▶ Training starten",
+    trainStop: "⏹ Stoppen",
+    trainEpoch: "Epoche:",
+    evalTitle: "Evaluation & Protokoll",
+    evalRun: "📊 Evaluation ausführen",
+    evalHint: "Klicken Sie auf Ausführen, um das aktuelle Modell gegen alle annotierten Bilder zu testen.",
+    evalPdf: "📄 PDF Protokoll",
+    evalZip: "📦 ZIP Export",
+    batchLabelTitle: "Batch Assisted Labeling",
+    batchLabelDesc: "Wählt ungelabelte Bilder aus und verwendet das YOLO Modell, um automatisch Bounding Boxes vorzuschlagen.",
+    batchLabelModel: "Modell für Labeling:"
   },
   en: {
     stationTitle: "HFU AI Lab Workstation",
@@ -55,35 +81,61 @@ const i18n = {
     welcomeText: "This autonomous AI workstation enables end-to-end training and evaluation of a modern YOLOv11 Neural Network.",
     stepsTitle: "Lab Workflow",
     step1: "1. Focus",
-    step1Desc: "Siemens star sharpness alignment.",
+    dashStep1: "1. Camera & Focus",
+    dashStep1Desc: "Focus Siemens star and check metrics.",
     step2: "2. COCO Live",
-    step2Desc: "Familiarization test.",
+    dashStep2: "2. COCO Exploration",
+    dashStep2Desc: "Test inference with pre-trained models.",
     step3: "3. Capture",
-    step3Desc: "Acquire component images.",
+    dashStep3: "3. Capture Images",
+    dashStep3Desc: "Create dataset of your component.",
     step4: "4. Labeling",
-    step4Desc: "AI-assisted annotation.",
+    dashStep4: "4. Labeling",
+    dashStep4Desc: "Annotate images and assign classes.",
     step5: "5. Training",
-    step5Desc: "Transfer learning on Jetson.",
+    dashStep5: "5. AI Training",
+    dashStep5Desc: "Start YOLO transfer learning.",
     step6: "6. Evaluation",
-    step6Desc: "mAP & PDF report.",
+    dashStep6: "6. Evaluation",
+    dashStep6Desc: "Calculate mAP metrics & create report.",
     focusTitle: "Live Camera View & Focus Measurement",
     focusDesc: "Adjust the manual focus ring until the lines are sharp.",
     focusMeasArea: "Measurement Zone",
-    focusScoreUnit: "/ 100",
-    focusAlgoRow: "Algorithm",
-    focusAreaRow: "Meas. Zone",
     focusVarRow: "Laplacian Variance",
-    focusAreaValue: "Center 40%",
-    focusAlgoValue: "Laplacian σ²",
-    focusHintDefault: "🎯 Place the Siemens star in the measurement zone and rotate the focus ring.",
-    focusHintSharp: "✅ Optimal focus achieved!",
-    focusHintGood: "🔄 Very good! Rotate the focus ring a little more.",
-    focusHintOk: "🔄 Moderate. The score should increase.",
-    focusHintBlurry: "⚠️ Blurry. Rotate the focus ring.",
     zoneBlurry: "Blurry",
     zoneOk: "Moderate",
     zoneGood: "Good",
-    zoneSharp: "Sharp"
+    zoneSharp: "Sharp",
+    btnPrev: "⬅ Back",
+    btnNext: "Next ➡",
+    cocoTitle: "Live YOLO Inference (COCO Exploration)",
+    cocoSelectModel: "Select Model",
+    cocoUploadModel: "Upload Custom Model (.pt)",
+    cocoShowBoxes: "Show Bounding Boxes",
+    cocoLiveStats: "Live Statistics",
+    captureTitle: "Image Capture",
+    captureBtn: "Capture Image",
+    captureGallery: "Gallery",
+    labelingTitle: "Assisted Labeling",
+    labelingImages: "Images",
+    labelingBatchBtn: "🤖 Batch Assisted Labeling",
+    labelingClasses: "Classes",
+    labelingBoxes: "Boxes (Current Image)",
+    trainingTitle: "AI Training",
+    trainServer: "Training Server URL (empty for local)",
+    trainEpochs: "Epochs",
+    trainModel: "Start Model",
+    trainStart: "▶ Start Training",
+    trainStop: "⏹ Stop",
+    trainEpoch: "Epoch:",
+    evalTitle: "Evaluation & Report",
+    evalRun: "📊 Run Evaluation",
+    evalHint: "Click run to test the current model against all annotated images.",
+    evalPdf: "📄 PDF Report",
+    evalZip: "📦 ZIP Export",
+    batchLabelTitle: "Batch Assisted Labeling",
+    batchLabelDesc: "Selects unlabeled images and uses the YOLO model to automatically propose bounding boxes.",
+    batchLabelModel: "Model for Labeling:"
   }
 };
 
@@ -92,32 +144,35 @@ let focusInterval = null;
 let trainInterval = null;
 let isAdmin = false;
 
+// Chart.js instance for Inference
+let inferChart = null;
+let inferTimeData = [];
+let inferFpsData = [];
+let inferLabels = [];
+
 // Initialization
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   initLanguage();
   initDynamicLinks();
   startStatusPolling();
+  initChart();
   
-  // Attach Tab handlers
   const tabBtns = document.querySelectorAll(".tab-btn");
   tabBtns.forEach(btn => {
     btn.addEventListener("click", () => switchTab(btn.getAttribute("data-tab")));
   });
 
-  // Fetch initial data
   fetchModels();
   fetchGallery();
   fetchClasses();
 });
 
-// Dynamic Links
 function initDynamicLinks() {
   const host = window.location.hostname || "localhost";
   const jupyterBtn = document.getElementById("btn-jupyter-link");
   if (jupyterBtn) jupyterBtn.href = `http://${host}:8888`;
 
-  // Set direct stream URLs
   const streamUrl = `http://${host}:8000/api/stream`;
   const inferUrl = `http://${host}:8000/api/infer-stream`;
   
@@ -130,7 +185,6 @@ function initDynamicLinks() {
   if (imgInfer) imgInfer.src = inferUrl;
 }
 
-// Theme
 function initTheme() {
   const themeBtn = document.getElementById("theme-toggle");
   const savedTheme = localStorage.getItem("hfu_theme") || "light";
@@ -146,7 +200,6 @@ function initTheme() {
   });
 }
 
-// Language
 function initLanguage() {
   const langBtn = document.getElementById("lang-toggle");
   langBtn.addEventListener("click", () => {
@@ -161,11 +214,16 @@ function applyLanguage() {
   const dict = i18n[currentLang];
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
-    if (dict[key]) el.textContent = dict[key];
+    if (dict[key]) {
+      if (el.tagName === "INPUT" && el.hasAttribute("placeholder")) {
+        el.placeholder = dict[key];
+      } else {
+        el.textContent = dict[key];
+      }
+    }
   });
 }
 
-// Tab Switching
 function switchTab(target) {
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
   document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
@@ -175,21 +233,15 @@ function switchTab(target) {
   const tab = document.getElementById(`tab-${target}`);
   if(tab) tab.classList.add("active");
 
-  // Handle specific tab polling
-  if (target === "kiosk") startFocusPolling();
-  else stopFocusPolling();
-
-  if (target === "coco") startInferPolling();
-  else stopInferPolling();
-
+  if (target === "kiosk") startFocusPolling(); else stopFocusPolling();
+  if (target === "coco") startInferPolling(); else stopInferPolling();
   if (target === "capture") fetchGallery();
   if (target === "labeling") { fetchGalleryForLabeling(); fetchClasses(); }
+  if (target === "training") startTrainPolling(); else stopTrainPolling();
   
-  if (target === "training") startTrainPolling();
-  else stopTrainPolling();
+  window.scrollTo(0,0);
 }
 
-// System Status Polling
 function startStatusPolling() {
   setInterval(async () => {
     try {
@@ -215,11 +267,11 @@ function updateDot(id, isOnline) {
   if (dot) dot.classList.toggle("online", isOnline);
 }
 
-// Focus Score Polling
+// ------------------------------------------------------------------
+// Tab 2: Focus
 async function fetchFocusScore() {
   try {
-    const host = window.location.hostname || "localhost";
-    const res  = await fetch(`http://${host}:8000/api/focus-score`);
+    const res  = await fetch("/api/focus-score");
     if (!res.ok) return;
     const d = await res.json();
 
@@ -227,42 +279,91 @@ async function fetchFocusScore() {
     const gaugeEl = document.getElementById("focus-gauge-fill");
     const badgeEl = document.getElementById("focus-label-badge");
     const rawEl   = document.getElementById("focus-raw-var");
-    const hintEl  = document.getElementById("focus-hint");
 
     if (scoreEl) { scoreEl.textContent = d.score; scoreEl.style.color = d.color; }
     if (gaugeEl) gaugeEl.style.width = d.score + "%";
     if (badgeEl) {
-      badgeEl.textContent = d.label_de;
+      badgeEl.textContent = currentLang === 'de' ? d.label_de : d.label;
       badgeEl.style.background = d.color + "22";
       badgeEl.style.color      = d.color;
     }
     if (rawEl) rawEl.textContent = d.raw_variance.toFixed(1);
-    if (hintEl) {
-      const t = i18n[currentLang];
-      if (d.label === "sharp") { hintEl.textContent = t.focusHintSharp; hintEl.style.color = "#16a34a"; }
-      else if (d.label === "good") { hintEl.textContent = t.focusHintGood; hintEl.style.color = "#65a30d"; }
-      else if (d.label === "ok") { hintEl.textContent = t.focusHintOk; hintEl.style.color = "#d97706"; }
-      else if (d.label === "blurry") { hintEl.textContent = t.focusHintBlurry; hintEl.style.color = "#dc2626"; }
-      else { hintEl.textContent = t.focusHintDefault; hintEl.style.color = ""; }
-    }
   } catch (e) {}
 }
 
 function startFocusPolling() { if (!focusInterval) focusInterval = setInterval(fetchFocusScore, 500); }
 function stopFocusPolling() { if (focusInterval) { clearInterval(focusInterval); focusInterval = null; } }
 
+
 // ------------------------------------------------------------------
 // Tab 3: COCO Live Inference
+function initChart() {
+  const ctx = document.getElementById('inferChart');
+  if(!ctx) return;
+  inferChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: inferLabels,
+      datasets: [
+        { label: 'Infer ms', data: inferTimeData, borderColor: '#ef4444', borderWidth: 2, yAxisID: 'y' },
+        { label: 'FPS', data: inferFpsData, borderColor: '#3b82f6', borderWidth: 2, yAxisID: 'y1' }
+      ]
+    },
+    options: {
+      responsive: true,
+      animation: false,
+      scales: {
+        x: { display: false },
+        y: { type: 'linear', display: true, position: 'left', min: 0 },
+        y1: { type: 'linear', display: true, position: 'right', min: 0, grid: {drawOnChartArea: false} }
+      },
+      plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: {size: 10} } } }
+    }
+  });
+}
+
 let inferInterval = null;
 async function fetchModels() {
   const res = await fetch("/api/models");
   const data = await res.json();
   const sel = document.getElementById("coco-model-select");
-  if(sel) {
-    sel.innerHTML = "";
-    data.builtin.forEach(m => sel.add(new Option(m, m)));
-    data.custom.forEach(m => sel.add(new Option("Custom: " + m, m)));
-    sel.value = data.current;
+  const selBatch = document.getElementById("batch-model-select");
+  
+  if(sel) sel.innerHTML = "";
+  if(selBatch) selBatch.innerHTML = "";
+  
+  data.builtin.forEach(m => {
+    sel?.add(new Option(m, m));
+    selBatch?.add(new Option(m, m));
+  });
+  data.custom.forEach(m => {
+    sel?.add(new Option("Custom: " + m, m));
+    selBatch?.add(new Option("Custom: " + m, m));
+  });
+  
+  if(sel) sel.value = data.current;
+}
+
+async function uploadModel(inputElement, isBatch=false) {
+  if(!inputElement.files.length) return;
+  const file = inputElement.files[0];
+  const formData = new FormData();
+  formData.append("file", file);
+  
+  alert("Upload startet...");
+  const res = await fetch("/api/models/upload", { method: "POST", body: formData });
+  if(res.ok) {
+    await fetchModels();
+    const data = await res.json();
+    if(isBatch) {
+      document.getElementById("batch-model-select").value = data.name;
+    } else {
+      document.getElementById("coco-model-select").value = data.name;
+      updateInferConfig();
+    }
+    alert("Upload erfolgreich!");
+  } else {
+    alert("Upload Fehler.");
   }
 }
 
@@ -281,21 +382,28 @@ function startInferPolling() {
   if(!inferInterval) inferInterval = setInterval(async () => {
     const res = await fetch("/api/infer-stats");
     const d = await res.json();
+    
     document.getElementById("infer-fps").textContent = d.fps;
     document.getElementById("infer-ms").textContent = d.infer_ms;
-    const list = document.getElementById("infer-dets");
-    list.innerHTML = d.detections.map(det => `
-      <div class="det-item">
-        <span class="det-cls">${det.class}</span>
-        <span class="det-conf">${det.confidence}</span>
-      </div>`).join("");
+    
+    // Update Chart
+    const maxPoints = 20;
+    if(inferLabels.length >= maxPoints) { inferLabels.shift(); inferTimeData.shift(); inferFpsData.shift(); }
+    inferLabels.push('');
+    inferTimeData.push(d.infer_ms);
+    inferFpsData.push(d.fps);
+    if(inferChart) inferChart.update();
+
   }, 1000);
 }
 function stopInferPolling() { if(inferInterval) { clearInterval(inferInterval); inferInterval=null; } }
 
+
 // ------------------------------------------------------------------
-// Tab 4: Capture (Galerie)
-let currentLightboxId = null;
+// Tab 4: Capture
+let currentGalleryList = [];
+let currentLightboxIndex = -1;
+
 async function captureImage() {
   const res = await fetch("/api/capture", {method:"POST"});
   if (res.ok) fetchGallery();
@@ -304,32 +412,49 @@ async function captureImage() {
 async function fetchGallery() {
   const res = await fetch("/api/images");
   const data = await res.json();
+  currentGalleryList = data.images;
   document.getElementById("gallery-count").textContent = data.total;
   const grid = document.getElementById("gallery-grid");
   if(!grid) return;
-  grid.innerHTML = data.images.map(img => `
-    <div class="gallery-item" onclick="openLightbox('${img.id}')">
+  grid.innerHTML = data.images.map((img, idx) => `
+    <div class="gallery-item" onclick="openLightbox(${idx})">
       <img src="/api/images/${img.id}" loading="lazy">
       ${img.annotated ? '<span class="badge-success">Labeled</span>' : ''}
     </div>
   `).join("");
 }
 
-function openLightbox(id) {
-  currentLightboxId = id;
-  const modal = document.getElementById("lightbox-modal");
+function openLightbox(idx) {
+  if(idx < 0 || idx >= currentGalleryList.length) return;
+  currentLightboxIndex = idx;
+  const id = currentGalleryList[idx].id;
   document.getElementById("lightbox-img").src = `/api/images/${id}`;
-  modal.style.display = "block";
+  document.getElementById("lightbox-modal").style.display = "flex";
 }
+
+function navLightbox(direction) {
+  openLightbox(currentLightboxIndex + direction);
+}
+
 async function deleteCurrentImage() {
-  if(!currentLightboxId) return;
-  if(confirm("Bild wirklich löschen?")) {
-    await fetch(`/api/images/${currentLightboxId}`, {method:"DELETE"});
-    document.getElementById("lightbox-modal").style.display = "none";
-    fetchGallery();
-    fetchGalleryForLabeling();
-  }
+  if(currentLightboxIndex === -1) return;
+  const id = currentGalleryList[currentLightboxIndex].id;
+  await fetch(`/api/images/${id}`, {method:"DELETE"});
+  document.getElementById("lightbox-modal").style.display = "none";
+  fetchGallery();
+  fetchGalleryForLabeling();
 }
+
+// Lightbox keyboard navigation
+document.addEventListener("keydown", e => {
+  const modal = document.getElementById("lightbox-modal");
+  if(modal && modal.style.display === "flex") {
+    if(e.key === "ArrowLeft") navLightbox(-1);
+    if(e.key === "ArrowRight") navLightbox(1);
+    if(e.key === "Escape") modal.style.display = "none";
+  }
+});
+
 
 // ------------------------------------------------------------------
 // Tab 5: Labeling
@@ -355,16 +480,27 @@ async function addClass() {
   const name = document.getElementById("new-class-name").value.trim();
   if(!name) return;
   classes.push(name);
-  await fetch("/api/labels", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({classes})});
+  await saveClasses();
   document.getElementById("new-class-name").value = "";
   renderClassList();
 }
+async function deleteClass(idx) {
+  classes.splice(idx, 1);
+  if(selectedClassIdx >= classes.length) selectedClassIdx = Math.max(0, classes.length-1);
+  await saveClasses();
+  renderClassList();
+}
+async function saveClasses() {
+  await fetch("/api/labels", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({classes})});
+}
+
 function renderClassList() {
   const cl = document.getElementById("class-list");
   if(!cl) return;
   cl.innerHTML = classes.map((c, i) => `
     <div class="class-item ${i===selectedClassIdx?'active':''}" onclick="selectedClassIdx=${i}; renderClassList();" style="border-left:4px solid ${getColor(i)}">
-      ${i}: ${c}
+      <span>${i}: ${c}</span>
+      <button class="btn-del-class" onclick="event.stopPropagation(); deleteClass(${i})">❌</button>
     </div>
   `).join("");
 }
@@ -384,14 +520,12 @@ async function fetchGalleryForLabeling() {
 
 async function selectImageForLabeling(id) {
   activeImageId = id;
-  fetchGalleryForLabeling(); // update active state
+  fetchGalleryForLabeling();
   
-  // load annotations
   const res = await fetch(`/api/annotations/${id}`);
   const data = await res.json();
   annotations = data.annotations;
 
-  // load image to canvas
   const img = new Image();
   img.crossOrigin = "anonymous";
   img.onload = () => {
@@ -429,7 +563,7 @@ function renderBoxList() {
   bl.innerHTML = annotations.map((box, i) => `
     <div class="box-item">
       <span>${classes[box.class_id]}</span>
-      <button onclick="deleteBox(${i})">🗑️</button>
+      <button onclick="deleteBox(${i})" style="background:transparent; border:none; cursor:pointer;">🗑️</button>
     </div>
   `).join("");
 }
@@ -437,6 +571,7 @@ function renderBoxList() {
 function deleteBox(idx) {
   annotations.splice(idx, 1);
   drawCanvas();
+  saveAnnotationsSilently();
 }
 
 if(canvas) {
@@ -477,6 +612,7 @@ if(canvas) {
       const cx = (Math.min(startX, endX) / canvas.width) + w/2;
       const cy = (Math.min(startY, endY) / canvas.height) + h/2;
       annotations.push({class_id: selectedClassIdx, cx, cy, w, h});
+      saveAnnotationsSilently();
     }
     drawCanvas();
   });
@@ -487,30 +623,62 @@ function getColor(idx) {
   return colors[idx % colors.length];
 }
 
-async function saveAnnotations() {
+async function saveAnnotationsSilently() {
   if(!activeImageId) return;
   await fetch(`/api/annotations/${activeImageId}`, {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({annotations})
   });
-  alert("Gespeichert!");
-  fetchGalleryForLabeling();
+  fetchGalleryForLabeling(); // updates the tick
+  showSaveIndicator();
 }
 
-async function runAssistedLabeling() {
-  if(!activeImageId) return;
-  const res = await fetch(`/api/assisted-label/${activeImageId}`, {method:"POST"});
-  if(res.ok) {
-    const data = await res.json();
-    annotations = data.annotations.map(a => ({
-      class_id: Math.min(a.class_id, classes.length-1),
-      cx: a.cx, cy: a.cy, w: a.w, h: a.h
-    }));
-    drawCanvas();
-  } else {
-    alert("Fehler bei Assisted Labeling");
+function showSaveIndicator() {
+  const ind = document.getElementById("save-indicator");
+  if(ind) {
+    ind.style.display = "block";
+    setTimeout(() => { ind.style.display = "none"; }, 1500);
   }
+}
+
+function openBatchAssistedModal() {
+  document.getElementById("batch-label-modal").style.display = "flex";
+}
+
+async function startBatchLabeling() {
+  const model = document.getElementById("batch-model-select").value;
+  // Make sure infer engine is on this model (Backend endpoint uses infer_engine model)
+  await fetch("/api/infer-config", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({model: model})
+  });
+  
+  document.getElementById("batch-label-modal").style.display = "none";
+  alert("Batch Labeling gestartet. Dies kann einen Moment dauern...");
+  
+  // Loop over unlabeled images
+  let count = 0;
+  for (let img of labelingImages) {
+    if (!img.annotated) {
+      const res = await fetch(`/api/assisted-label/${img.id}`, {method:"POST"});
+      if(res.ok) {
+        const data = await res.json();
+        const mapped = data.annotations.map(a => ({
+          class_id: Math.min(a.class_id, classes.length-1),
+          cx: a.cx, cy: a.cy, w: a.w, h: a.h
+        }));
+        await fetch(`/api/annotations/${img.id}`, {
+          method: "POST", headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({annotations: mapped})
+        });
+        count++;
+      }
+    }
+  }
+  alert(`Fertig! ${count} Bilder wurden assistiert gelabelt.`);
+  fetchGalleryForLabeling();
+  if(activeImageId) selectImageForLabeling(activeImageId);
 }
 
 // ------------------------------------------------------------------
@@ -560,14 +728,18 @@ function startTrainPolling() {
 }
 function stopTrainPolling() { if(trainInterval) { clearInterval(trainInterval); trainInterval = null; } }
 
+// ------------------------------------------------------------------
+// Tab 7: Eval
 async function runEvaluation() {
+  const out = document.getElementById("eval-results");
+  out.innerHTML = `<p>Läuft... bitte warten.</p>`;
   const res = await fetch("/api/evaluation/run", {method:"POST"});
   const d = await res.json();
-  const out = document.getElementById("eval-results");
   if(d.error) {
     out.innerHTML = `<p style="color:red;">${d.error}</p>`;
   } else {
     out.innerHTML = `
+      <h3>Ergebnisse:</h3>
       <p><strong>Bilder evaluiert:</strong> ${d.images_evaluated}</p>
       <p><strong>Precision:</strong> ${d.precision}</p>
       <p><strong>Recall:</strong> ${d.recall}</p>
@@ -580,7 +752,7 @@ async function generateReport() {
 }
 
 // ------------------------------------------------------------------
-// Tab 7: Admin
+// Tab 8: Admin
 function showAdminLogin() {
   if(isAdmin) { switchTab('admin'); return; }
   document.getElementById('admin-modal').style.display='flex';
