@@ -112,6 +112,7 @@ def mjpeg_stream_generator():
 
 
 @app.get("/api/stream")
+@app.head("/api/stream")
 def video_feed():
     """Live MJPEG Camera Stream Endpoint."""
     return StreamingResponse(mjpeg_stream_generator(),
