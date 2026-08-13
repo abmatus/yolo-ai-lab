@@ -45,23 +45,42 @@ def generate_siemens_star_fallback():
 
 
 def grab_frame_subprocess(idx):
-    """Isolated 1.5s subprocess to capture frame without risking main process hang."""
+    """Isolated 1.5s subprocess trying MJPG, YUYV & default formats on camera index."""
     script = f"""
 import cv2, numpy as np, sys
-try:
-    cap = cv2.VideoCapture({idx}, cv2.CAP_V4L2)
-    if cap.isOpened():
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        ret, frame = cap.read()
-        cap.release()
-        if ret and frame is not None and np.mean(frame) > 2.0:
-            ret_bytes, jpg = cv2.imencode('.jpg', frame)
-            if ret_bytes:
-                sys.stdout.buffer.write(jpg.tobytes())
-                sys.exit(0)
-except Exception:
-    pass
+
+def try_cap(backend, fourcc=None):
+    try:
+        cap = cv2.VideoCapture({idx}, backend) if backend is not None else cv2.VideoCapture({idx})
+        if cap.isOpened():
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            if fourcc:
+                cap.set(cv2.CAP_PROP_FOURCC, fourcc)
+            
+            # Read up to 3 frames for camera warmup
+            frame = None
+            for _ in range(3):
+                ret, f = cap.read()
+                if ret and f is not None and f.size > 0:
+                    frame = f
+            cap.release()
+            
+            if frame is not None and np.mean(frame) > 0.5:
+                ret_bytes, jpg = cv2.imencode('.jpg', frame)
+                if ret_bytes:
+                    sys.stdout.buffer.write(jpg.tobytes())
+                    sys.exit(0)
+    except Exception:
+        pass
+
+# 1. Try V4L2 + MJPG
+try_cap(cv2.CAP_V4L2, cv2.VideoWriter_fourcc(*'MJPG'))
+# 2. Try V4L2 default format
+try_cap(cv2.CAP_V4L2, None)
+# 3. Try default OpenCV backend
+try_cap(None, None)
+
 sys.exit(1)
 """
     try:
@@ -89,6 +108,7 @@ class StreamEngine:
     def _loop(self):
         while self.running:
             found = False
+            # Check indices 0, 1, 2, 3
             indices_to_try = [CAM_ID] + [i for i in range(4) if i != CAM_ID]
             for idx in indices_to_try:
                 if os.path.exists(f"/dev/video{idx}"):
