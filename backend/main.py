@@ -75,6 +75,7 @@ class StreamEngine:
 
     def __init__(self):
         self._jpeg: bytes = _make_siemens_star("Starting camera…")
+        self._frame: Optional[np.ndarray] = None   # raw numpy frame for analysis
         self._lock = threading.Lock()
         self._frame_event = threading.Event()  # set when new JPEG is ready
         self.is_real = False
@@ -142,6 +143,7 @@ class StreamEngine:
                 _, buf = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
                 with self._lock:
                     self._jpeg = buf.tobytes()
+                    self._frame = frame.copy()   # store raw frame for focus analysis
                     self.is_real = True
                 self._frame_event.set()
             else:
@@ -163,6 +165,11 @@ class StreamEngine:
         """Return the latest pre-encoded JPEG bytes (no copy overhead)."""
         with self._lock:
             return self._jpeg
+
+    def get_latest_frame(self) -> Optional[np.ndarray]:
+        """Return a copy of the latest raw numpy frame for analysis."""
+        with self._lock:
+            return self._frame.copy() if self._frame is not None else None
 
     def get_status(self) -> bool:
         return self.is_real
@@ -197,6 +204,60 @@ async def video_feed():
         _mjpeg_gen(),
         media_type="multipart/x-mixed-replace; boundary=frame",
     )
+
+
+@app.get("/api/focus-score")
+def focus_score():
+    """
+    Computes a focus quality score using Laplacian variance on the center
+    of the current camera frame. Higher variance = sharper image.
+    This is the standard algorithm used in autofocus systems.
+    """
+    frame = stream_engine.get_latest_frame()
+    if frame is None or not stream_engine.get_status():
+        return JSONResponse({
+            "score": 0, "raw_variance": 0.0,
+            "label": "no_camera", "label_de": "Keine Kamera",
+            "color": "#6b7280"
+        })
+
+    h, w = frame.shape[:2]
+    # Crop center 40% region (where Siemens star should be placed)
+    cx, cy = w // 2, h // 2
+    rw, rh = int(w * 0.4), int(h * 0.4)
+    roi = frame[cy - rh//2 : cy + rh//2, cx - rw//2 : cx + rw//2]
+
+    gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+    lap_var = float(cv2.Laplacian(gray, cv2.CV_64F).var())
+
+    # Map raw variance to 0-100 score
+    if lap_var < 50:
+        score = int(lap_var / 50 * 20)           # 0-20
+    elif lap_var < 200:
+        score = 20 + int((lap_var - 50) / 150 * 30)    # 20-50
+    elif lap_var < 800:
+        score = 50 + int((lap_var - 200) / 600 * 30)   # 50-80
+    elif lap_var < 2000:
+        score = 80 + int((lap_var - 800) / 1200 * 15)  # 80-95
+    else:
+        score = min(100, 95 + int((lap_var - 2000) / 1000 * 5))  # 95-100
+
+    if score < 30:
+        label, label_de, color = "blurry",  "Unscharf",    "#ef4444"
+    elif score < 60:
+        label, label_de, color = "ok",      "Mittelmäßig", "#f59e0b"
+    elif score < 85:
+        label, label_de, color = "good",    "Gut",         "#84cc16"
+    else:
+        label, label_de, color = "sharp",   "Scharf ✓",    "#22c55e"
+
+    return JSONResponse({
+        "score":       score,
+        "raw_variance": round(lap_var, 1),
+        "label":       label,
+        "label_de":    label_de,
+        "color":       color,
+    })
 
 
 @app.get("/api/status")

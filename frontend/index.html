@@ -113,12 +113,66 @@
 
     <!-- Tab 2: Kiosk & Focus Hardware Test -->
     <div class="tab-content" id="tab-kiosk">
-      <div class="card">
+      <div class="card focus-card">
         <h2 data-i18n="focusTitle">Live-Kamerabild &amp; Fokus-Messung (Siemensstern)</h2>
         <p data-i18n="focusDesc">Stellen Sie den manuellen Fokusring der C-Mount Linse ein, bis die Linien des Siemenssterns im Zentrum scharf abgegrenzt sind.</p>
-        
-        <div class="video-frame-container">
-          <img id="cam-stream-main" src="" alt="Live Camera Stream" class="video-stream">
+
+        <div class="focus-layout">
+          <!-- Video with center crosshair overlay -->
+          <div class="focus-video-wrapper">
+            <div class="video-frame-container">
+              <img id="cam-stream-main" src="" alt="Live Camera Stream" class="video-stream">
+              <!-- Measurement zone indicator -->
+              <div class="focus-roi-box">
+                <span class="focus-roi-label">Messbereich</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Focus meter panel -->
+          <div class="focus-panel">
+            <div class="focus-score-display">
+              <div class="focus-score-value" id="focus-score-num">--</div>
+              <div class="focus-score-unit">/ 100</div>
+            </div>
+
+            <div class="focus-label-badge" id="focus-label-badge">Messe...</div>
+
+            <!-- Gauge bar -->
+            <div class="focus-gauge-track">
+              <div class="focus-gauge-fill" id="focus-gauge-fill" style="width:0%"></div>
+              <div class="focus-gauge-markers">
+                <span>0</span><span>30</span><span>60</span><span>85</span><span>100</span>
+              </div>
+            </div>
+
+            <!-- Zone labels -->
+            <div class="focus-zones">
+              <span class="zone zone-bad">Unscharf</span>
+              <span class="zone zone-ok">Mittelmäßig</span>
+              <span class="zone zone-good">Gut</span>
+              <span class="zone zone-sharp">Scharf</span>
+            </div>
+
+            <div class="focus-detail">
+              <div class="focus-detail-row">
+                <span>Laplace-Varianz</span>
+                <strong id="focus-raw-var">--</strong>
+              </div>
+              <div class="focus-detail-row">
+                <span>Messbereich</span>
+                <strong>Zentrum 40%</strong>
+              </div>
+              <div class="focus-detail-row">
+                <span>Algorithmus</span>
+                <strong>Laplacian σ²</strong>
+              </div>
+            </div>
+
+            <div class="focus-hint" id="focus-hint">
+              🎯 Platzieren Sie den Siemensstern im Messbereich und drehen Sie am Fokusring bis der Score maximal ist.
+            </div>
+          </div>
         </div>
       </div>
     </div>

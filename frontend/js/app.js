@@ -174,6 +174,9 @@ function initTabs() {
       tabContents.forEach(c => c.classList.remove("active"));
       btn.classList.add("active");
       document.getElementById(`tab-${target}`).classList.add("active");
+      // Start focus polling only when on the focus/kiosk tab
+      if (target === "kiosk") { startFocusPolling(); }
+      else { stopFocusPolling(); }
       resetInactivityTimer();
     });
   });
@@ -218,6 +221,64 @@ function updateDot(id, isOnline) {
       dot.classList.remove("online");
     }
   }
+}
+
+// Focus Score Live Polling
+let focusInterval = null;
+
+function startFocusPolling() {
+  if (focusInterval) return;
+  focusInterval = setInterval(fetchFocusScore, 500);
+  fetchFocusScore();
+}
+
+function stopFocusPolling() {
+  if (focusInterval) { clearInterval(focusInterval); focusInterval = null; }
+}
+
+async function fetchFocusScore() {
+  try {
+    const host = window.location.hostname || "localhost";
+    const res  = await fetch(`http://${host}:8000/api/focus-score`);
+    if (!res.ok) return;
+    const d = await res.json();
+
+    const scoreEl = document.getElementById("focus-score-num");
+    const gaugeEl = document.getElementById("focus-gauge-fill");
+    const badgeEl = document.getElementById("focus-label-badge");
+    const rawEl   = document.getElementById("focus-raw-var");
+    const hintEl  = document.getElementById("focus-hint");
+
+    if (scoreEl) {
+      scoreEl.textContent = d.score;
+      scoreEl.style.color = d.color;
+    }
+    if (gaugeEl) gaugeEl.style.width = d.score + "%";
+    if (badgeEl) {
+      badgeEl.textContent = d.label_de;
+      badgeEl.style.background = d.color + "22";
+      badgeEl.style.color      = d.color;
+    }
+    if (rawEl) rawEl.textContent = d.raw_variance.toFixed(1);
+    if (hintEl) {
+      if (d.label === "sharp") {
+        hintEl.textContent = "✅ Optimaler Fokus erreicht! Die Kamera ist scharf eingestellt.";
+        hintEl.style.color = "#16a34a";
+      } else if (d.label === "good") {
+        hintEl.textContent = "🔄 Sehr gut! Noch etwas am Fokusring drehen für maximale Schärfe.";
+        hintEl.style.color = "#65a30d";
+      } else if (d.label === "ok") {
+        hintEl.textContent = "🔄 Mittelmäßig. Drehen Sie am Fokusring – Score sollte steigen.";
+        hintEl.style.color = "#d97706";
+      } else if (d.label === "blurry") {
+        hintEl.textContent = "⚠️ Unscharf. Siemensstern in den Messbereich legen und Fokusring drehen.";
+        hintEl.style.color = "#dc2626";
+      } else {
+        hintEl.textContent = "🎯 Platzieren Sie den Siemensstern im Messbereich und drehen Sie am Fokusring bis der Score maximal ist.";
+        hintEl.style.color = "";
+      }
+    }
+  } catch (e) { /* silent */ }
 }
 
 // Attract Mode Logic (Messe / Demo Timeout)

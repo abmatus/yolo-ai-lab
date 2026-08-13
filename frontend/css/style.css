@@ -391,3 +391,176 @@ footer {
   background-color: var(--bg-card);
   margin-top: auto;
 }
+
+/* ==============================================================================
+   Focus Meter (Fokus-Messung Tab)
+   ============================================================================== */
+
+.focus-card { overflow: visible; }
+
+.focus-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 20px;
+  align-items: start;
+  margin-top: 16px;
+}
+
+@media (max-width: 860px) {
+  .focus-layout { grid-template-columns: 1fr; }
+}
+
+/* Video wrapper with ROI overlay */
+.focus-video-wrapper { position: relative; }
+
+.focus-roi-box {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40%; height: 40%;
+  border: 2px dashed rgba(34, 197, 94, 0.8);
+  border-radius: 6px;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.focus-roi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #22c55e;
+  background: rgba(0,0,0,0.55);
+  padding: 2px 8px;
+  border-radius: 0 0 4px 4px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Right panel */
+.focus-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+/* Score number */
+.focus-score-display {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.focus-score-value {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--hfu-green);
+  transition: color 0.4s ease;
+  font-variant-numeric: tabular-nums;
+}
+
+.focus-score-unit {
+  font-size: 18px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Badge label */
+.focus-label-badge {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: var(--hfu-green-light);
+  color: var(--hfu-green);
+  transition: background 0.4s ease, color 0.4s ease;
+  align-self: flex-start;
+}
+
+/* Gauge bar */
+.focus-gauge-track {
+  width: 100%;
+  height: 14px;
+  background: linear-gradient(to right, #ef4444 0%, #f59e0b 30%, #84cc16 60%, #22c55e 85%);
+  border-radius: 7px;
+  position: relative;
+  overflow: visible;
+}
+
+.focus-gauge-fill {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  background: transparent;
+  border-right: 3px solid white;
+  box-shadow: 0 0 6px rgba(0,0,0,0.4);
+  border-radius: 7px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.focus-gauge-markers {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Zone labels below gauge */
+.focus-zones {
+  display: flex;
+  gap: 4px;
+}
+
+.zone {
+  flex: 1;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 2px;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+}
+.zone-bad   { background: rgba(239,68,68,0.15);  color: #ef4444; }
+.zone-ok    { background: rgba(245,158,11,0.15); color: #d97706; }
+.zone-good  { background: rgba(132,204,22,0.15); color: #65a30d; }
+.zone-sharp { background: rgba(34,197,94,0.15);  color: #16a34a; }
+
+/* Detail rows */
+.focus-detail {
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.focus-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.focus-detail-row strong {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hint text */
+.focus-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
+}
