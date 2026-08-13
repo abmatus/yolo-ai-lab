@@ -18,9 +18,58 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global camera instance & demo inference settings
 CAM_ID = int(os.getenv("CAMERA_INDEX", "0"))
 WORKSPACE_DIR = os.getenv("WORKSPACE_DIR", "/workspace/student_data")
+
+# Persistent Camera Manager
+class CameraManager:
+    def __init__(self):
+        self.cap = None
+        self.active_index = -1
+        self.last_frame = None
+        self.is_real = False
+
+    def find_and_open_camera(self):
+        """Scans video indices 0, 1, 2, 3 to find any working USB webcam."""
+        indices_to_try = [CAM_ID] + [i for i in range(4) if i != CAM_ID]
+        for idx in indices_to_try:
+            device_path = f"/dev/video{idx}"
+            if os.path.exists(device_path):
+                cap = cv2.VideoCapture(idx, cv2.CAP_V4L2)
+                if cap.isOpened():
+                    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+                    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+                    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
+                    ret, frame = cap.read()
+                    if ret and frame is not None:
+                        self.cap = cap
+                        self.active_index = idx
+                        self.is_real = True
+                        print(f"[CAMERA] Successfully opened USB webcam on {device_path}")
+                        return True
+                    cap.release()
+        
+        self.is_real = False
+        return False
+
+    def get_frame(self):
+        """Gets a frame from the active USB camera or returns Siemens Star fallback."""
+        if self.cap is not None and self.cap.isOpened():
+            ret, frame = self.cap.read()
+            if ret and frame is not None:
+                self.last_frame = frame
+                return frame, True
+
+        # Try to reconnect camera
+        if self.find_and_open_camera():
+            ret, frame = self.cap.read()
+            if ret and frame is not None:
+                self.last_frame = frame
+                return frame, True
+
+        return generate_siemens_star_fallback(), False
+
+camera_mgr = CameraManager()
 
 
 def generate_siemens_star_fallback():
@@ -44,25 +93,12 @@ def generate_siemens_star_fallback():
     return img
 
 
-def get_video_frame():
-    """Tries to capture from USB camera /dev/video0, else returns Siemens Star pattern."""
-    cap = cv2.VideoCapture(CAM_ID)
-    if cap.isOpened():
-        ret, frame = cap.read()
-        cap.release()
-        if ret and frame is not None:
-            return frame, True
-    
-    return generate_siemens_star_fallback(), False
-
-
 def mjpeg_stream_generator():
     """MJPEG stream generator for live camera view."""
     while True:
-        frame, is_real_cam = get_video_frame()
-        # Add timestamp & HFU watermark
+        frame, is_real_cam = camera_mgr.get_frame()
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        status_text = "CAM: ONLINE" if is_real_cam else "CAM: SIMULATED (DEMO)"
+        status_text = f"CAM: ONLINE (/dev/video{camera_mgr.active_index})" if is_real_cam else "CAM: SIMULATED (DEMO)"
         color = (0, 200, 0) if is_real_cam else (0, 165, 255)
         
         cv2.putText(frame, f"{status_text} | {timestamp}", (10, frame.shape[0] - 15),
@@ -85,11 +121,7 @@ def video_feed():
 @app.get("/api/status")
 def system_status():
     """Comprehensive Hardware & Environment Status Endpoint."""
-    # Check Camera
-    cap = cv2.VideoCapture(CAM_ID)
-    cam_online = cap.isOpened()
-    if cam_online:
-        cap.release()
+    frame, cam_online = camera_mgr.get_frame()
 
     # Get RAM & CPU
     mem = psutil.virtual_memory()
@@ -111,8 +143,8 @@ def system_status():
         "station": "HFU Jetson Orin Nano AI-Workstation",
         "camera": {
             "online": cam_online,
-            "device": f"/dev/video{CAM_ID}",
-            "mode": "Real USB Industrial Cam" if cam_online else "Siemens Star Fallback"
+            "device": f"/dev/video{camera_mgr.active_index}" if cam_online else "/dev/video0",
+            "mode": f"Real USB Webcam (/dev/video{camera_mgr.active_index})" if cam_online else "Siemens Star Fallback"
         },
         "wlan": {
             "ssid": ssid,
