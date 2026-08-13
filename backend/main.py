@@ -11,6 +11,7 @@ import os
 import subprocess
 import threading
 import time
+from typing import Optional
 
 import cv2
 import numpy as np
@@ -76,13 +77,13 @@ class StreamEngine:
         self._lock = threading.Lock()
         self._frame_event = threading.Event()  # set when new JPEG is ready
         self.is_real = False
-        self._cap: cv2.VideoCapture | None = None
+        self._cap: Optional[cv2.VideoCapture] = None
         self._running = True
         self._thread = threading.Thread(target=self._loop, daemon=True, name="cam-reader")
         self._thread.start()
 
     # ------------------------------------------------------------------
-    def _open(self) -> cv2.VideoCapture | None:
+    def _open(self) -> Optional[cv2.VideoCapture]:
         print(f"[CAM] Opening /dev/video{CAM_INDEX} …")
         cap = cv2.VideoCapture(CAM_INDEX, cv2.CAP_V4L2)
         if not cap.isOpened():
