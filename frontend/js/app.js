@@ -103,11 +103,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Dynamic Links setup (JupyterLab port 8888 according to host IP/hostname)
 function initDynamicLinks() {
+  const host = window.location.hostname || "localhost";
+
+  // JupyterLab direct link
   const jupyterBtn = document.getElementById("btn-jupyter-link");
   if (jupyterBtn) {
-    const host = window.location.hostname || "localhost";
     jupyterBtn.href = `http://${host}:8888`;
   }
+
+  // MJPEG stream: bypass Nginx and connect directly to backend on port 8000.
+  // Nginx proxy_buffering causes the stream to freeze even with proxy_buffering off
+  // on some Nginx versions. Direct connection is always reliable.
+  const streamUrl = `http://${host}:8000/api/stream`;
+  const streamMain = document.getElementById("cam-stream-main");
+  const streamDemo = document.getElementById("cam-stream-demo");
+  if (streamMain) streamMain.src = streamUrl;
+  if (streamDemo) streamDemo.src = streamUrl;
 }
 
 // Theme Management
