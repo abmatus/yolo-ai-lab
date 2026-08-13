@@ -30,11 +30,13 @@ Die Weboberfläche im **"Clean Academic"** Stil basiert auf den offiziellen Corp
 ### Hardware-Komponenten
 | Komponente | Spezifikation |
 |---|---|
-| **Recheneinheit** | NVIDIA Jetson Orin Nano Developer Kit (NVMe SSD) |
+| **Recheneinheit** | NVIDIA Jetson Orin Nano Developer Kit (**NVMe SSD**, Jetson Linux L4T R36.4.7) |
 | **Kamera** | USB 3.0 Industriekamera (C-Mount, manueller Fokusring) |
 | **Prüffläche** | 80 x 60 cm Arbeitsfläche mit Bosch-Lichtbalken & Siemensstern |
 | **Display** | 19-Zoll Monitor für den Stand-/Kiosk-Betrieb |
 | **Netzwerk** | 5GHz Wi-Fi Access Point (`AI-LAB-ORIN-XX`) für BYOD (Laptop der Studierenden) |
+
+> 📌 **NVMe SSD Boot & Migration Details:** Siehe [`04_Hardware_NVMe_Setup.md`](04_Hardware_NVMe_Setup.md) für die Schritt-für-Schritt Boot-Konfiguration (`extlinux.conf` Fix: `root=/dev/nvme0n1p1`).
 
 ### Docker-Container-Architektur
 
