@@ -43,7 +43,23 @@ const i18n = {
     step6: "6. Real-World Evaluation",
     step6Desc: "TensorRT Beschleunigung, mAP & PDF-Protokoll.",
     systemResetSuccess: "Praktikumsdaten wurden erfolgreich zurückgesetzt!",
-    usbExportSuccess: "Daten wurden erfolgreich auf den angeschlossenen USB-Stick exportiert!"
+    usbExportSuccess: "Daten wurden erfolgreich auf den angeschlossenen USB-Stick exportiert!",
+    focusMeasArea: "Messbereich",
+    focusScoreUnit: "/ 100",
+    focusAlgoRow: "Algorithmus",
+    focusAreaRow: "Messbereich",
+    focusVarRow: "Laplace-Varianz",
+    focusAreaValue: "Zentrum 40%",
+    focusAlgoValue: "Laplacian σ²",
+    focusHintDefault: "🎯 Platzieren Sie den Siemensstern im Messbereich und drehen Sie am Fokusring bis der Score maximal ist.",
+    focusHintSharp: "✅ Optimaler Fokus erreicht! Die Kamera ist scharf eingestellt.",
+    focusHintGood: "🔄 Sehr gut! Noch etwas am Fokusring drehen für maximale Schärfe.",
+    focusHintOk: "🔄 Mittelmäßig. Drehen Sie am Fokusring – Score sollte steigen.",
+    focusHintBlurry: "⚠️ Unscharf. Siemensstern in den Messbereich legen und Fokusring drehen.",
+    zoneBlurry: "Unscharf",
+    zoneOk: "Mittelmäßig",
+    zoneGood: "Gut",
+    zoneSharp: "Scharf"
   },
   en: {
     stationTitle: "HFU AI Lab Workstation",
@@ -84,7 +100,23 @@ const i18n = {
     step6: "6. Real-World Evaluation",
     step6Desc: "TensorRT acceleration, mAP & PDF report export.",
     systemResetSuccess: "Workspace successfully reset for next student team!",
-    usbExportSuccess: "Data successfully exported to connected USB drive!"
+    usbExportSuccess: "Data successfully exported to connected USB drive!",
+    focusMeasArea: "Measurement Zone",
+    focusScoreUnit: "/ 100",
+    focusAlgoRow: "Algorithm",
+    focusAreaRow: "Meas. Zone",
+    focusVarRow: "Laplacian Variance",
+    focusAreaValue: "Center 40%",
+    focusAlgoValue: "Laplacian σ²",
+    focusHintDefault: "🎯 Place the Siemens star in the measurement zone and rotate the focus ring until score is maximum.",
+    focusHintSharp: "✅ Optimal focus achieved! Camera is sharp.",
+    focusHintGood: "🔄 Very good! Rotate the focus ring a little more for maximum sharpness.",
+    focusHintOk: "🔄 Moderate. Turn the focus ring — the score should increase.",
+    focusHintBlurry: "⚠️ Blurry. Place the Siemens star in the zone and rotate the focus ring.",
+    zoneBlurry: "Blurry",
+    zoneOk: "Moderate",
+    zoneGood: "Good",
+    zoneSharp: "Sharp"
   }
 };
 
@@ -261,20 +293,21 @@ async function fetchFocusScore() {
     }
     if (rawEl) rawEl.textContent = d.raw_variance.toFixed(1);
     if (hintEl) {
+      const t = i18n[currentLang];
       if (d.label === "sharp") {
-        hintEl.textContent = "✅ Optimaler Fokus erreicht! Die Kamera ist scharf eingestellt.";
+        hintEl.textContent = t.focusHintSharp;
         hintEl.style.color = "#16a34a";
       } else if (d.label === "good") {
-        hintEl.textContent = "🔄 Sehr gut! Noch etwas am Fokusring drehen für maximale Schärfe.";
+        hintEl.textContent = t.focusHintGood;
         hintEl.style.color = "#65a30d";
       } else if (d.label === "ok") {
-        hintEl.textContent = "🔄 Mittelmäßig. Drehen Sie am Fokusring – Score sollte steigen.";
+        hintEl.textContent = t.focusHintOk;
         hintEl.style.color = "#d97706";
       } else if (d.label === "blurry") {
-        hintEl.textContent = "⚠️ Unscharf. Siemensstern in den Messbereich legen und Fokusring drehen.";
+        hintEl.textContent = t.focusHintBlurry;
         hintEl.style.color = "#dc2626";
       } else {
-        hintEl.textContent = "🎯 Platzieren Sie den Siemensstern im Messbereich und drehen Sie am Fokusring bis der Score maximal ist.";
+        hintEl.textContent = t.focusHintDefault;
         hintEl.style.color = "";
       }
     }
