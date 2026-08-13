@@ -38,15 +38,18 @@ services:
       context: ./jupyter
     container_name: hfu_ai_jupyter
     restart: always
+    privileged: true
     ports:
       - "8888:8888"
     runtime: nvidia
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
+      - LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libgomp.so.1
     volumes:
       - ./notebooks:/workspace/notebooks
       - ./student_data:/workspace/student_data
       - ./data:/workspace/data
+      - /dev:/dev
     networks:
       - ai_lab_net
 

@@ -1,6 +1,7 @@
 FROM nvcr.io/nvidia/l4t-pytorch:r35.2.1-pth2.0-py3
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libgomp.so.1
 
 WORKDIR /workspace
 

@@ -15,9 +15,9 @@ echo "======================================================================"
 echo "      HFU AI-LAB: NVIDIA Jetson Orin Nano Auto-Installer Setup"
 echo "======================================================================"
 
-# 1. Install Docker & Prerequisites if missing
-echo "[SETUP] Updating package lists and installing prerequisites..."
-apt-get update
+# 1. Update & Upgrade system packages
+echo "[SETUP] Updating package lists and upgrading system packages..."
+apt-get update && apt-get upgrade -y
 apt-get install -y git v4l-utils hostapd dnsmasq curl jq docker.io docker-compose-v2 nvidia-container-toolkit chromium-browser || true
 
 # 2. Configure NVIDIA Container Toolkit Runtime
