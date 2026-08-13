@@ -44,7 +44,30 @@ def generate_siemens_star_fallback():
     return img
 
 
-# Single-Threaded Background Camera Reader (Exclusively locks V4L2 once)
+def check_camera_index_with_timeout(idx):
+    """Runs an isolated 2-second subprocess to check if camera index works without hanging."""
+    test_script = f"""
+import cv2, numpy as np, sys
+try:
+    cap = cv2.VideoCapture({idx}, cv2.CAP_V4L2)
+    if cap.isOpened():
+        ret, frame = cap.read()
+        cap.release()
+        if ret and frame is not None and np.mean(frame) > 2.0:
+            sys.exit(0)
+except Exception:
+    pass
+sys.exit(1)
+"""
+    try:
+        res = subprocess.run(["python3", "-c", test_script], timeout=2.0, capture_output=True)
+        return res.returncode == 0
+    except subprocess.TimeoutExpired:
+        print(f"[CAMERA] Index {idx} timed out (CSI/Driver hanging node skipped).")
+        return False
+
+
+# Subprocess-Protected Non-Blocking Camera Manager
 class CameraManager:
     def __init__(self):
         self.cap = None
@@ -61,38 +84,34 @@ class CameraManager:
         for idx in indices_to_try:
             device_path = f"/dev/video{idx}"
             if os.path.exists(device_path):
-                cap = cv2.VideoCapture(idx, cv2.CAP_V4L2)
-                if cap.isOpened():
-                    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-                    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-                    
-                    # Read 5 warmup frames to let auto-exposure adjust
-                    frame = None
-                    for _ in range(5):
+                # Verify index with timeout first so OpenCV never hangs the server
+                if check_camera_index_with_timeout(idx):
+                    cap = cv2.VideoCapture(idx, cv2.CAP_V4L2)
+                    if cap.isOpened():
+                        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+                        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
                         ret, frame = cap.read()
-                        time.sleep(0.02)
-                    
-                    if frame is not None and np.mean(frame) > 2.0:
-                        self.cap = cap
-                        self.active_index = idx
-                        self.is_real = True
-                        print(f"[CAMERA] Exclusively locked USB webcam on {device_path} (Mean Brightness: {np.mean(frame):.1f})")
-                        return True
-                    cap.release()
+                        if ret and frame is not None and np.mean(frame) > 2.0:
+                            self.cap = cap
+                            self.active_index = idx
+                            self.is_real = True
+                            print(f"[CAMERA] Successfully opened USB webcam on {device_path}")
+                            return True
+                        cap.release()
 
         self.is_real = False
         self.cap = None
         return False
 
     def _update_loop(self):
-        """Dedicated background thread reading V4L2 device continuously."""
+        """Dedicated background thread reading V4L2 device safely."""
         while self.running:
             if self.cap is None or not self.cap.isOpened():
                 if not self._try_open_camera():
                     with self.lock:
                         self.current_frame = generate_siemens_star_fallback()
                         self.is_real = False
-                    time.sleep(1.0)
+                    time.sleep(2.0)
                     continue
 
             ret, frame = self.cap.read()
@@ -101,16 +120,15 @@ class CameraManager:
                     self.current_frame = frame
                     self.is_real = True
             else:
-                # Frame bad or black, release and fallback
                 if self.cap:
                     self.cap.release()
                     self.cap = None
                 with self.lock:
                     self.current_frame = generate_siemens_star_fallback()
                     self.is_real = False
-                time.sleep(0.5)
+                time.sleep(1.0)
 
-            time.sleep(0.03) # ~30 FPS
+            time.sleep(0.04) # ~25 FPS
 
     def get_latest_frame(self):
         with self.lock:
