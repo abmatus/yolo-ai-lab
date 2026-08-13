@@ -13,14 +13,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --no-cache-dir \
-    jupyterlab \
-    ultralytics \
-    opencv-python-headless \
-    matplotlib \
-    pandas \
-    seaborn \
-    reportlab \
-    pyyaml
+    "jupyterlab>=3.6.0,<4.0.0" \
+    "ultralytics==8.1.34" \
+    "opencv-python-headless==4.9.0.80" \
+    "matplotlib<3.8.0" \
+    "pandas<2.1.0" \
+    "seaborn" \
+    "reportlab==4.1.0" \
+    "pyyaml"
 
 EXPOSE 8888
 
