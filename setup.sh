@@ -18,7 +18,7 @@ echo "======================================================================"
 # 1. Update system packages
 echo "[SETUP] Updating package lists..."
 apt-get update
-apt-get install -y git v4l-utils hostapd dnsmasq curl jq docker.io docker-compose-v2 nvidia-container-toolkit || true
+apt-get install -y git v4l-utils hostapd dnsmasq curl jq docker.io docker-compose-v2 nvidia-container-toolkit x11-xserver-utils || true
 apt-get install -y chromium-browser || true
 
 # 2. Configure NVIDIA Container Toolkit Runtime
@@ -65,12 +65,14 @@ fi
 usermod -aG docker "$REAL_USER"
 echo "[SETUP] User $REAL_USER added to docker group."
 
-# 5. Enable Ubuntu Desktop Auto-Login for $REAL_USER
+# 5. Enable Ubuntu Desktop Auto-Login for $REAL_USER (GDM3 & LightDM)
 echo "[SETUP] Enabling Desktop Auto-Login for user $REAL_USER..."
-if [ -f /etc/gdm3/custom.conf ]; then
-    sed -i 's/^#  AutomaticLoginEnable = .*/AutomaticLoginEnable = true/' /etc/gdm3/custom.conf
-    sed -i "s/^#  AutomaticLogin = .*/AutomaticLogin = $REAL_USER/" /etc/gdm3/custom.conf
-fi
+mkdir -p /etc/gdm3
+cat <<EOF > /etc/gdm3/custom.conf
+[daemon]
+AutomaticLoginEnable=true
+AutomaticLogin=$REAL_USER
+EOF
 
 if [ -d /etc/lightdm ]; then
     mkdir -p /etc/lightdm/lightdm.conf.d
@@ -81,7 +83,10 @@ autologin-user-timeout=0
 EOF
 fi
 
-# 6. Configure Chromium Fullscreen Kiosk Autostart on Desktop
+# 6. Disable Screen Blanking, DPMS & Sleep (Keep Monitor ON 24/7)
+echo "[SETUP] Disabling screen blanking & DPMS sleep mode..."
+systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target 2>/dev/null || true
+
 USER_HOME=$(eval echo "~$REAL_USER")
 AUTOSTART_DIR="$USER_HOME/.config/autostart"
 mkdir -p "$AUTOSTART_DIR"
@@ -89,13 +94,13 @@ mkdir -p "$AUTOSTART_DIR"
 cat <<EOF > "$AUTOSTART_DIR/hfu-kiosk.desktop"
 [Desktop Entry]
 Type=Application
-Name=HFU AI Workstation Kiosk
-Exec=chromium-browser --kiosk --noerrdialogs --disable-infobars --check-for-update-interval=31536000 http://localhost
+Name=HFU AI Workstation Kiosk & Display KeepAlive
+Exec=bash -c "xset s off -dpms s noblank 2>/dev/null; gsettings set org.gnome.desktop.session idle-delay 0 2>/dev/null; gsettings set org.gnome.desktop.screensaver lock-enabled false 2>/dev/null; chromium-browser --kiosk --noerrdialogs --disable-infobars --check-for-update-interval=31536000 http://localhost"
 X-GNOME-Autostart-enabled=true
 EOF
 
 chown -R "$REAL_USER:$REAL_USER" "$USER_HOME/.config"
-echo "[SUCCESS] Kiosk Autostart configured for Desktop."
+echo "[SUCCESS] Kiosk & Display KeepAlive configured for Desktop."
 
 # 7. Create Systemd Autostart & Auto-Update Service
 SERVICE_FILE="/etc/systemd/system/hfu-ai-lab.service"
